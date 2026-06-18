@@ -412,15 +412,8 @@ export default function App() {
                     </details>
                   )}
 
-                  <InsoleDiagram rx={result} />
+                  <InsoleDiagram rx={result} form={form} />
 
-                  <div className="print-only signature-block">
-                    <div className="signature-line">____________________________________</div>
-                    <div>{form.especialista || "[Nombre del Especialista]"}</div>
-                    <div>{form.especialidad || "[Especialidad]"}</div>
-                    {form.especialistaRut && <div>RUT: {form.especialistaRut}</div>}
-                    <div style={{ marginTop: "0.25rem" }}>Próximo Control Sugerido: <strong>{result.fechaControl}</strong></div>
-                  </div>
                   <div className="rx-actions">
                     <button className="btn-save" onClick={handleGuardar}>
                       Guardar en Registro
@@ -431,51 +424,100 @@ export default function App() {
                     {savedMsg && <span className="saved-msg">{savedMsg}</span>}
                   </div>
 
-                  {/* PÁGINA 2 PARA IMPRESIÓN (Guía para Padres) */}
+                  {/* HOJA 2: Educación para Padres */}
                   <div className="print-page-2">
                     <div className="print-header">
-                      <h2>Guía de Uso y Seguimiento Clínico para Padres</h2>
-                      <p>Paciente: {form.paciente || "Sin nombre"} · Fecha: {new Date().toLocaleDateString("es-CL")}</p>
+                      <h2>Educación para Padres — Pie Plano y Uso de Plantillas</h2>
+                      <p>Paciente: <strong>{form.paciente || "Sin nombre"}</strong> · Fecha: {new Date().toLocaleDateString("es-CL")} · Próximo control: <strong>{result.fechaControl}</strong></p>
                       {form.especialista && (
                         <p style={{ marginTop: "0.25rem", fontWeight: "bold" }}>
-                          Especialista: {form.especialista} {form.especialidad ? `· ${form.especialidad}` : ""} {form.especialistaRut ? `· RUT: ${form.especialistaRut}` : ""}
+                          {form.especialista}{form.especialidad ? ` · ${form.especialidad}` : ""}{form.especialistaRut ? ` · RUT: ${form.especialistaRut}` : ""}
                         </p>
                       )}
                     </div>
 
-                    <div className="print-card">
-                      <h3>5. Instructivo de Adaptación Gradual y Uso</h3>
-                      <p>Para asegurar una adaptación adecuada y evitar molestias, siga este esquema:</p>
-                      <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0" }}>
-                        <li><strong>Día 1:</strong> Usar durante 1 a 2 horas únicamente.</li>
-                        <li><strong>Día 2:</strong> Usar durante 2 a 3 horas.</li>
-                        <li><strong>Día 3:</strong> Usar de 4 a 5 horas.</li>
-                        <li><strong>Día 4 en adelante:</strong> Uso a tiempo completo si no hay molestias.</li>
-                      </ul>
-                      <p style={{ marginTop: "0.5rem" }}>
-                        <strong>Calzado adecuado:</strong> El zapato debe ser firme en el talón (contrafuerte estable), ancho en la parte delantera para no aprisionar los dedos, y de preferencia contar con plantilla extraíble.
-                      </p>
-                      <p style={{ marginTop: "0.5rem" }}>
-                        <strong>Mantenimiento e higiene:</strong> Limpiar con un paño húmedo y jabón suave. No sumergir en agua ni secar al sol directo o con calor artificial (radiadores o secadores), ya que deforma los materiales ortésicos (EVA/Polipropileno).
-                      </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.85rem" }}>
+
+                      <div className="print-card">
+                        <h3>¿Qué es el Pie Plano?</h3>
+                        <svg viewBox="0 0 200 90" style={{ width:"100%", marginBottom:"0.5rem" }}>
+                          {/* Pie normal */}
+                          <ellipse cx="45" cy="70" rx="30" ry="12" fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.5"/>
+                          <path d="M20 70 C22 55 30 42 38 35 C46 28 54 28 58 35 C62 42 66 55 70 70" fill="none" stroke="#3b82f6" strokeWidth="1.5"/>
+                          <path d="M20 70 C22 60 35 52 45 52 C55 52 68 60 70 70" fill="#bfdbfe" stroke="#3b82f6" strokeWidth="1" opacity="0.6"/>
+                          <text x="45" y="87" textAnchor="middle" fontSize="8" fill="#1d4ed8" fontWeight="bold">PIE NORMAL</text>
+                          <text x="45" y="22" textAnchor="middle" fontSize="7" fill="#1e3a8a">Arco elevado</text>
+                          {/* Pie plano */}
+                          <ellipse cx="155" cy="70" rx="32" ry="12" fill="#fee2e2" stroke="#ef4444" strokeWidth="1.5"/>
+                          <path d="M128 70 C130 60 138 50 148 44 C158 38 166 38 170 44 C174 50 178 60 180 70" fill="none" stroke="#ef4444" strokeWidth="1.5"/>
+                          <path d="M128 70 C128 68 180 68 180 70" fill="#fca5a5" stroke="#ef4444" strokeWidth="1" opacity="0.6"/>
+                          <text x="155" y="87" textAnchor="middle" fontSize="8" fill="#b91c1c" fontWeight="bold">PIE PLANO</text>
+                          <text x="155" y="22" textAnchor="middle" fontSize="7" fill="#7f1d1d">Sin arco (colapsado)</text>
+                        </svg>
+                        <p>El pie plano ocurre cuando el arco longitudinal medial colapsa, permitiendo que toda la planta toque el suelo. En niños menores de 6 años es fisiológico y normal.</p>
+                      </div>
+
+                      <div className="print-card">
+                        <h3>Evolución Natural del Arco</h3>
+                        <svg viewBox="0 0 200 90" style={{ width:"100%", marginBottom:"0.5rem" }}>
+                          <line x1="15" y1="75" x2="185" y2="75" stroke="#ccc" strokeWidth="1"/>
+                          <line x1="15" y1="75" x2="15" y2="10" stroke="#ccc" strokeWidth="1"/>
+                          {/* Curve: flat at birth, rising by age 6-10 */}
+                          <path d="M15 72 C35 72 50 70 65 62 C80 54 95 40 115 30 C135 22 155 20 185 20"
+                            fill="none" stroke="#10b981" strokeWidth="2.5"/>
+                          <text x="10" y="8" fontSize="6.5" fill="#065f46">% con arco</text>
+                          {/* X axis labels */}
+                          <text x="15" y="83" textAnchor="middle" fontSize="6" fill="#444">0</text>
+                          <text x="65" y="83" textAnchor="middle" fontSize="6" fill="#444">3</text>
+                          <text x="115" y="83" textAnchor="middle" fontSize="6" fill="#444">6</text>
+                          <text x="165" y="83" textAnchor="middle" fontSize="6" fill="#444">10</text>
+                          <text x="100" y="92" textAnchor="middle" fontSize="7" fill="#444">Edad (años)</text>
+                          {/* Annotation */}
+                          <text x="140" y="17" fontSize="6.5" fill="#065f46">~80% mejoran</text>
+                          <text x="140" y="25" fontSize="6.5" fill="#065f46">solos antes</text>
+                          <text x="140" y="33" fontSize="6.5" fill="#065f46">de los 10 años</text>
+                        </svg>
+                        <p>La mayoría de los niños desarrollan el arco espontáneamente. Las plantillas <strong>apoyan este proceso</strong> sin reemplazarlo. Caminar descalzo en superficies irregulares (arena, pasto) también ayuda.</p>
+                      </div>
+
+                      <div className="print-card">
+                        <h3>Plan de Adaptación a la Plantilla</h3>
+                        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:"0.82rem", marginTop:"0.25rem" }}>
+                          <tbody>
+                            {[["Día 1","1 – 2 horas"],["Día 2","2 – 3 horas"],["Día 3","4 – 5 horas"],["Día 4+","Uso completo"]].map(([d,h]) => (
+                              <tr key={d} style={{ borderBottom:"1px solid #e5e7eb" }}>
+                                <td style={{ padding:"0.3rem 0.5rem", fontWeight:"bold", color:"#1d4ed8" }}>{d}</td>
+                                <td style={{ padding:"0.3rem 0.5rem" }}>{h}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        <p style={{ marginTop:"0.5rem" }}><strong>Calzado:</strong> Contrafuerte firme, puntera ancha, plantilla extraíble.</p>
+                        <p style={{ marginTop:"0.25rem" }}><strong>Higiene:</strong> Limpiar con paño húmedo. No mojar ni secar con calor.</p>
+                      </div>
+
+                      <div className="print-card">
+                        <h3>Señales de Alarma — Consulte de Inmediato</h3>
+                        <svg viewBox="0 0 200 70" style={{ width:"100%", marginBottom:"0.5rem" }}>
+                          {/* Semáforo horizontal */}
+                          {[["#22c55e","Verde","Sin dolor al usar"], ["#eab308","Amarillo","Dolor leve 1ª sem."], ["#ef4444","Rojo","Dolor persistente"]].map(([c, n, t], i) => (
+                            <g key={n} transform={`translate(${i * 66 + 10}, 5)`}>
+                              <circle cx="28" cy="20" r="18" fill={c} opacity="0.85"/>
+                              <text x="28" y="46" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill={c}>{n}</text>
+                              <text x="28" y="56" textAnchor="middle" fontSize="5.5" fill="#333">{t}</text>
+                            </g>
+                          ))}
+                        </svg>
+                        <ul style={{ paddingLeft:"1rem", margin:"0", fontSize:"0.82rem" }}>
+                          <li>Enrojecimiento o ampollas en zona del arco</li>
+                          <li>Dolor que no cede tras 2 semanas de uso gradual</li>
+                          <li>Cambio en la forma de caminar</li>
+                        </ul>
+                      </div>
+
                     </div>
 
-                    <div className="print-card" style={{ marginTop: "1.5rem" }}>
-                      <h3>6. Cronograma de Controles y Cuándo Reconsultar</h3>
-                      <p><strong>Calendario de Revisiones:</strong></p>
-                      <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0" }}>
-                        <li><strong>Control Inicial (3 Meses):</strong> Programar para la fecha estimada: <strong>{result.fechaControl}</strong>. Este control evalúa la tolerancia del niño, adaptación del material y la marcha.</li>
-                        <li><strong>Controles Anuales Posteriores:</strong> Cada 1 año para evaluar crecimiento, cambio de talla y evolución clínica del arco.</li>
-                      </ul>
-                      <p style={{ marginTop: "0.5rem" }}>
-                        <strong>Signos de alarma (Reconsulta inmediata):</strong>
-                      </p>
-                      <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0" }}>
-                        <li>Presencia de enrojecimiento continuo de la piel, dolor localizado persistente o ampollas en la zona del arco medial.</li>
-                        <li>Dolor que no desaparece tras las primeras 2 semanas de uso gradual.</li>
-                      </ul>
-                    </div>
-                    <div className="print-only signature-block" style={{ marginTop: "2rem" }}>
+                    <div className="print-only signature-block" style={{ marginTop: "1.5rem" }}>
                       <div className="signature-line">____________________________________</div>
                       <div>{form.especialista || "[Nombre del Especialista]"}</div>
                       <div>{form.especialidad || "[Especialidad]"}</div>
@@ -655,254 +697,346 @@ function GuiaClinica() {
   );
 }
 
-function InsoleDiagram({ rx }) {
+function InsoleDiagram({ rx, form }) {
   if (!rx || !rx.indicacion) return null;
 
   const hasMetatarsalPad = !!rx.padMetatarsal;
   const hasRearfootWedge = rx.cunaRearfoot && rx.cunaRearfoot !== "0°" && rx.cunaRearfoot !== "0 mm" && !rx.cunaRearfoot.includes("sin cuña") && rx.cunaRearfoot !== "0";
   const cunaRearfootText = hasRearfootWedge ? rx.cunaRearfoot : "";
   const hasForefootWedge = rx.cunaForefoot && rx.cunaForefoot !== "0°" && rx.cunaForefoot !== "0 mm" && rx.cunaForefoot !== "0";
-  const cunaForefootText = hasForefootWedge ? rx.cunaForefoot : "";
 
-  let archPeakY = 53;
-  let archText = `Arco: ${rx.arcoSoporte}`;
-  const archTextLower = rx.arcoSoporte.toLowerCase();
-  if (archTextLower.includes("18 mm") || archTextLower.includes("máximo")) {
-    archPeakY = 25;
-  } else if (archTextLower.includes("15 mm") || archTextLower.includes("medio") || archTextLower.includes("estándar")) {
-    archPeakY = 38;
-  } else if (archTextLower.includes("12 mm") || archTextLower.includes("8 mm") || archTextLower.includes("suave") || archTextLower.includes("mínimo")) {
-    archPeakY = 46;
-  }
+  const archMm = parseInt(rx.arcoSoporte) || 0;
+  const archText = `Arco: ${rx.arcoSoporte}`;
 
+  // Top view: arch zone opacity by height
+  const archOpacity = archMm >= 18 ? 0.95 : archMm >= 15 ? 0.75 : archMm >= 12 ? 0.55 : 0.35;
+
+  // Side view: arch rise in pixels (proportional to mm)
+  const archRisePx = archMm >= 18 ? 30 : archMm >= 15 ? 22 : archMm >= 12 ? 16 : archMm >= 8 ? 11 : 8;
+
+  // Side view: wedge height in pixels
+  const wedgeHpx = hasRearfootWedge ? Math.max(7, Math.min((parseInt(rx.cunaRearfoot) || 0) * 3, 22)) : 0;
+
+  // ── VISTA SUPERIOR (top-down, sin copa de talón) ──
   const renderInsoleTop = (isLeft) => {
     const side = isLeft ? "izquierdo" : "derecho";
     const isShorter = rx.alzaTalon && rx.alzaTalon.pie === side;
     return (
-      <g transform={isLeft ? "translate(100, 0) scale(-1, 1)" : ""}>
-        {/* Plantilla Base */}
-        <path 
-          d="M50 210 C36 210 26 195 24 165 C22 135 28 100 24 70 C22 50 22 30 32 18 C42 6 58 6 68 18 C78 30 76 50 78 70 C80 100 78 135 76 165 C74 195 64 210 50 210 Z" 
-          fill="var(--bg-card)" 
-          stroke="var(--accent)" 
-          strokeWidth="2" 
-        />
-        
-        {/* Contorno interno técnico */}
-        <path 
-          d="M50 202 C38 202 30 185 28 152 C24 122 31 93 29 68 C27 49 27 31 35 21 C43 11 57 11 65 21 C73 31 73 49 71 68 C69 93 76 122 72 152 C70 185 62 202 50 202 Z" 
-          fill="none" 
-          stroke="var(--border-color)" 
-          strokeWidth="0.75" 
-          opacity="0.5" 
+      <g transform={isLeft ? "translate(100,0) scale(-1,1)" : ""}>
+        <rect width="100" height="220" fill="url(#gridPatternI)" opacity="0.35"/>
+
+        {/* Contorno de la plantilla (huella 2D limpia) */}
+        <path
+          d="M50 210 C36 210 26 195 24 165 C22 135 28 100 24 70 C22 50 22 30 32 18 C42 6 58 6 68 18 C78 30 76 50 78 70 C80 100 78 135 76 165 C74 195 64 210 50 210 Z"
+          fill="var(--bg-card)"
+          stroke="var(--accent)"
+          strokeWidth="2"
         />
 
-        {/* Ejes Técnicos y Líneas de Referencia */}
-        <line x1="50" y1="10" x2="50" y2="210" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="5,2,2,2" opacity="0.3" />
-        <line x1="10" y1="78" x2="90" y2="78" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.3" />
-        <line x1="10" y1="125" x2="90" y2="125" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.3" />
-        <line x1="10" y1="180" x2="90" y2="180" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.3" />
+        {/* Eje central */}
+        <line x1="50" y1="12" x2="50" y2="208" stroke="var(--text-muted)" strokeWidth="0.4" strokeDasharray="4,3" opacity="0.2"/>
 
-        {/* Elevación del Arco Medial */}
-        <path 
-          d="M25 150 C20 120 30 90 28 65 C38 75 42 100 40 125 C38 140 32 148 25 150 Z" 
-          fill="url(#archGradTop)" 
-          stroke="var(--accent)" 
-          strokeWidth="1" 
-          opacity={archPeakY === 25 ? 0.95 : archPeakY === 38 ? 0.65 : 0.35}
+        {/* Zona de soporte de arco medial */}
+        <path
+          d="M24 148 C19 118 26 88 24 66 C31 70 37 96 36 122 C35 137 30 145 24 148 Z"
+          fill="rgba(99,102,241,0.5)"
+          stroke="rgba(99,102,241,0.85)"
+          strokeWidth="1.2"
+          opacity={archOpacity}
         />
 
-        {/* Cuña Retropié Varo */}
+        {/* Zona de cuña retropié (triángulo medial talón) */}
         {hasRearfootWedge && (
-          <path 
-            d="M50 210 C36 210 26 195 24 165 C31 160 40 175 44 190 C46 198 50 210 50 210 Z" 
-            fill="rgba(239, 68, 68, 0.4)" 
-            stroke="#ef4444" 
-            strokeWidth="1" 
+          <path
+            d="M50 210 C38 210 26 196 24 168 C30 163 38 172 42 186 C45 196 50 210 50 210 Z"
+            fill="rgba(239,68,68,0.55)"
+            stroke="#dc2626"
+            strokeWidth="1.5"
           />
         )}
 
-        {/* Cuña Antepié Varo */}
-        {hasForefootWedge && (
-          <path 
-            d="M28 70 C25 50 25 30 32 18 C35 28 35 48 32 58 Z" 
-            fill="rgba(239, 68, 68, 0.3)" 
-            stroke="#ef4444" 
-            strokeWidth="1" 
-          />
-        )}
-
-        {/* Barra Retrocapital */}
+        {/* Barra retrocapital */}
         {hasMetatarsalPad && (
-          <path 
-            d="M 28 82 C 28 78, 72 78, 72 82 C 72 85, 28 85, 28 82 Z" 
-            fill="rgba(245, 158, 11, 0.75)" 
-            stroke="#d97706" 
-            strokeWidth="1" 
-          />
-        )}
-        
-        {/* Alza de talón (Dismetria) */}
-        {isShorter && (
-          <path 
-            d="M50 210 C36 210 28 190 32 170 C35 155 45 155 50 155 C55 155 65 155 68 170 C72 190 64 210 50 210 Z" 
-            fill="rgba(180, 83, 9, 0.15)" 
-            stroke="#b45309" 
-            strokeWidth="1" 
-            strokeDasharray="2,1"
+          <path
+            d="M27 83 C27 79 73 79 73 83 C73 87 27 87 27 83 Z"
+            fill="rgba(245,158,11,0.8)"
+            stroke="#d97706"
+            strokeWidth="1.5"
           />
         )}
 
-        {/* Barra de Escala */}
-        <g transform="translate(8, 202)" opacity="0.4">
-          <line x1="0" y1="0" x2="20" y2="0" stroke="var(--text-secondary)" strokeWidth="0.75" />
-          <line x1="0" y1="-2" x2="0" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
-          <line x1="20" y1="-2" x2="20" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
+        {/* Cuña antepié */}
+        {hasForefootWedge && (
+          <path
+            d="M27 68 C24 50 24 30 32 18 C35 28 34 50 32 58 Z"
+            fill="rgba(239,68,68,0.35)"
+            stroke="#ef4444"
+            strokeWidth="1"
+          />
+        )}
+
+        {/* Alza de talón */}
+        {isShorter && (
+          <path
+            d="M50 210 C36 210 26 192 28 170 C35 158 45 158 50 158 C55 158 65 158 72 170 C74 192 64 210 50 210 Z"
+            fill="rgba(180,83,9,0.2)"
+            stroke="#b45309"
+            strokeWidth="1"
+            strokeDasharray="3,1.5"
+          />
+        )}
+
+        {/* Escala */}
+        <g transform="translate(10,201)" opacity="0.45">
+          <line x1="0" y1="0" x2="18" y2="0" stroke="var(--text-muted)" strokeWidth="0.75"/>
+          <line x1="0" y1="-2" x2="0" y2="2" stroke="var(--text-muted)" strokeWidth="0.75"/>
+          <line x1="18" y1="-2" x2="18" y2="2" stroke="var(--text-muted)" strokeWidth="0.75"/>
         </g>
       </g>
     );
   };
 
+  // ── VISTA LATERAL MEDIAL (perfil con cuña y arco) ──
+  // viewBox 0 0 300 130 — Talón siempre a la DERECHA, punta a la izquierda
   const renderInsoleSide = (isLeft) => {
     const side = isLeft ? "izquierdo" : "derecho";
     const isShorter = rx.alzaTalon && rx.alzaTalon.pie === side;
     const liftVal = isShorter ? rx.alzaTalon.valor : 0;
-    const liftHeightPx = Math.min(liftVal * 0.75, 18);
+    const alzaHpx = Math.min(liftVal * 0.9, 22);
+    const totalLift = wedgeHpx + alzaHpx;
+
+    // Coordenadas de referencia
+    const gY    = 112;  // línea de suelo
+    const baseY = 94;   // cara inferior plantilla (zona plana)
+    const shellH = 7;   // grosor del cuerpo de la plantilla
+    const puntaX = 24;
+    const heelX  = 248;
+    const wedgeSX = 188; // inicio de la cuña
+    const archL   = 70;
+    const archR   = 188;
+    const archMidX = 128;
+    const archTopY = baseY - shellH - archRisePx; // pico del arco (cara superior)
+    const heelBotY = baseY - totalLift;           // cara inferior talón (elevada por cuña)
+
+    // Para el pie derecho se espejea horizontalmente toda la figura,
+    // EXCEPTO los textos de anotación que se recalculan en coordenadas de pantalla.
+    const flip = isLeft ? "" : `translate(300,0) scale(-1,1)`;
+
+    // Posiciones de texto en coordenadas de pantalla (ya corregidas para espejo)
+    const scrHeelX  = isLeft ? heelX  : 300 - heelX;
+    const scrArchMX = isLeft ? archMidX : 300 - archMidX;
+    const wedgeTextX = isLeft ? heelX + 14 : 300 - heelX - 14;
+    const wedgeTextAnchor = isLeft ? "start" : "end";
+    const alzaTextX = isLeft ? heelX - 30 : 300 - heelX + 30;
 
     return (
-      <g transform={isLeft ? "translate(200, 0) scale(-1, 1)" : ""}>
-        {/* Base longitudinal de la plantilla */}
-        <path 
-          d="M 15 70 C 50 70 70 70 100 70 C 130 70 160 70 180 70 C 188 70 190 57 190 47 C 190 37 185 37 182 47 C 178 57 165 60 150 60 C 120 60 100 60 15 65 Z" 
-          fill="var(--bg-item-rx)" 
-          stroke="var(--border-color)" 
-          strokeWidth="2" 
-        />
-        
-        {/* Curvatura del Arco Medial */}
-        <path 
-          d={`M 60 70 C 80 ${archPeakY + 5} 110 ${archPeakY + 5} 140 70 Z`} 
-          fill="url(#archGradSide)" 
-          stroke="var(--accent)" 
-          strokeWidth="2" 
-        />
+      <>
+        {/* ── Formas (espejadas para pie derecho) ── */}
+        <g transform={flip}>
+          {/* Línea de suelo */}
+          <line x1="10" y1={gY} x2="290" y2={gY} stroke="#aaa" strokeWidth="0.8" strokeDasharray="5,3" opacity="0.5"/>
 
-        {/* Ejes Técnicos Laterales */}
-        <line x1="15" y1="70" x2="185" y2="70" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="4,4" opacity="0.3" />
-        <line x1="100" y1="20" x2="100" y2="85" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="4,4" opacity="0.2" />
+          {/* Cuña retropié (triángulo rojo bajo el talón) */}
+          {wedgeHpx > 0 && (
+            <path
+              d={`M ${wedgeSX},${baseY} L ${heelX},${heelBotY} L ${heelX},${gY} L ${wedgeSX},${gY} Z`}
+              fill="rgba(239,68,68,0.55)"
+              stroke="#dc2626"
+              strokeWidth="1.8"
+            />
+          )}
 
-        {/* Alza de talón por Dismetría */}
-        {isShorter && liftHeightPx > 0 && (
-          <path 
-            d={`M 115 70 C 135 70 160 70 180 70 C 188 70 188 ${70 + liftHeightPx} C 180 ${70 + liftHeightPx} 135 ${70 + liftHeightPx} 115 70 Z`} 
-            fill="rgba(180, 83, 9, 0.85)" 
-            stroke="#78350f" 
-            strokeWidth="1.5" 
+          {/* Alza de talón (marrón, adicional a la cuña) */}
+          {alzaHpx > 0 && (
+            <path
+              d={`M ${wedgeSX},${baseY - wedgeHpx} L ${heelX},${heelBotY - wedgeHpx} L ${heelX},${heelBotY} L ${wedgeSX},${baseY} Z`}
+              fill="rgba(180,83,9,0.6)"
+              stroke="#b45309"
+              strokeWidth="1.5"
+              strokeDasharray="4,2"
+            />
+          )}
+
+          {/* Cuerpo de la plantilla */}
+          <path
+            d={`
+              M ${puntaX},${baseY - shellH + 2}
+              C 46,${baseY - shellH - 1} ${archL + 5},${archTopY + archRisePx * 0.85} ${archMidX},${archTopY}
+              C ${archMidX + 30},${archTopY} ${wedgeSX - 18},${heelBotY - shellH} ${wedgeSX},${heelBotY - shellH}
+              L ${heelX},${heelBotY - shellH}
+              C ${heelX + 6},${heelBotY - shellH - 4} ${heelX + 6},${heelBotY + 2} ${heelX},${heelBotY}
+              L ${wedgeSX},${baseY}
+              C ${wedgeSX - 18},${baseY} ${archMidX + 30},${baseY - 2} ${archMidX},${baseY - 2}
+              C ${archL + 5},${baseY - 2} 46,${baseY - 2} ${puntaX},${baseY - 2}
+              C ${puntaX - 6},${baseY - 3} ${puntaX - 6},${baseY - shellH + 3} ${puntaX},${baseY - shellH + 2}
+              Z
+            `}
+            fill="var(--bg-card)"
+            stroke="var(--accent)"
+            strokeWidth="2"
           />
+
+          {/* Relleno zona arco */}
+          <path
+            d={`
+              M ${archL + 10},${baseY - shellH - 1}
+              C ${archMidX - 30},${archTopY + 4} ${archMidX + 30},${archTopY + 4} ${archR - 10},${baseY - shellH - 1}
+              Z
+            `}
+            fill="rgba(99,102,241,0.38)"
+            stroke="rgba(99,102,241,0.7)"
+            strokeWidth="1.2"
+          />
+        </g>
+
+        {/* ── Anotaciones (en coordenadas de pantalla, sin espejo) ── */}
+
+        {/* Cota de altura del arco */}
+        <line x1={scrArchMX} y1={archTopY - 3} x2={scrArchMX} y2={baseY - shellH - 1}
+          stroke="rgba(99,102,241,0.85)" strokeWidth="0.8" strokeDasharray="2,2"/>
+        <line x1={scrArchMX - 6} y1={archTopY - 3} x2={scrArchMX + 6} y2={archTopY - 3}
+          stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
+        <line x1={scrArchMX - 6} y1={baseY - shellH - 1} x2={scrArchMX + 6} y2={baseY - shellH - 1}
+          stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
+        <text x={scrArchMX} y={archTopY - 7} textAnchor="middle" fontSize="8.5"
+          fill="rgba(99,102,241,1)" fontWeight="bold" fontFamily="monospace">{rx.arcoSoporte}</text>
+
+        {/* Cota de cuña */}
+        {wedgeHpx > 0 && (
+          <>
+            <line x1={scrHeelX + (isLeft ? 11 : -11)} y1={heelBotY}
+                  x2={scrHeelX + (isLeft ? 11 : -11)} y2={baseY}
+              stroke="#dc2626" strokeWidth="0.8" strokeDasharray="2,2"/>
+            <line x1={scrHeelX + (isLeft ? 6 : -6)} y1={heelBotY}
+                  x2={scrHeelX + (isLeft ? 16 : -16)} y2={heelBotY}
+              stroke="#dc2626" strokeWidth="1.8"/>
+            <line x1={scrHeelX + (isLeft ? 6 : -6)} y1={baseY}
+                  x2={scrHeelX + (isLeft ? 16 : -16)} y2={baseY}
+              stroke="#dc2626" strokeWidth="1.8"/>
+            <text x={wedgeTextX} y={(heelBotY + baseY) / 2 + 3.5}
+              textAnchor={wedgeTextAnchor} fontSize="7.5"
+              fill="#dc2626" fontWeight="bold" fontFamily="monospace">Cuña {cunaRearfootText}</text>
+          </>
         )}
 
-        {/* Escala lateral */}
-        <g transform="translate(165, 25)" opacity="0.4">
-          <line x1="0" y1="0" x2="20" y2="0" stroke="var(--text-secondary)" strokeWidth="0.75" />
-          <line x1="0" y1="-2" x2="0" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
-          <line x1="20" y1="-2" x2="20" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
-        </g>
-      </g>
+        {/* Alza de talón label */}
+        {alzaHpx > 0 && (
+          <text x={alzaTextX} y={heelBotY - 5} textAnchor="middle" fontSize="7"
+            fill="#b45309" fontWeight="bold">+{liftVal} mm alza</text>
+        )}
+      </>
     );
   };
 
   return (
     <div className="insole-diagrams">
-      {/* SVG oculto con las definiciones globales de degradados y patrones */}
+      {/* Defs SVG globales */}
       <svg style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
         <defs>
-          <pattern id="gridPattern" width="10" height="10" patternUnits="userSpaceOnUse">
-            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="var(--border-color)" strokeWidth="0.5" opacity="0.3" />
+          <pattern id="gridPatternI" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="var(--border-color)" strokeWidth="0.4" opacity="0.35"/>
           </pattern>
-          <linearGradient id="archGradTop" x1="0%" y1="50%" x2="100%" y2="50%">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.15" />
-          </linearGradient>
-          <linearGradient id="archGradSide" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.05" />
-          </linearGradient>
         </defs>
       </svg>
 
       <h3>Diseño Técnico y Ajustes Mecánicos (Pies Izquierdo y Derecho)</h3>
-      
+
+      {/* Vista superior */}
       <div className="diagram-card" style={{ marginBottom: "1rem" }}>
-        <h4>Vistas Superiores (Moldes Técnicos)</h4>
+        <h4>Vistas Superiores — Molde Técnico (Vista Plantar)</h4>
         <div className="diagrams-dual-row">
           <div className="diagram-side-box">
             <h5>Pie Izquierdo</h5>
             <svg viewBox="0 0 100 220" className="insole-svg">
-              <rect width="100" height="220" fill="url(#gridPattern)" />
               {renderInsoleTop(true)}
-              <text x="50" y="215" textAnchor="middle" fontSize="6" fontWeight="bold">TALÓN</text>
-              <text x="50" y="12" textAnchor="middle" fontSize="6" fontWeight="bold">PUNTA</text>
-              <text x="73" y="110" textAnchor="middle" fontSize="5" fill="var(--accent)" transform="rotate(90, 73, 110)">{archText}</text>
-              {hasMetatarsalPad && <text x="50" y="90" fontSize="5" fill="#d97706" fontWeight="bold" textAnchor="middle">Barra R.</text>}
-              {hasRearfootWedge && <text x="86" y="195" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="start">← Cuña V. ({cunaRearfootText})</text>}
-              {hasForefootWedge && <text x="88" y="35" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="start">← Cuña A. ({cunaForefootText})</text>}
+              <text x="50" y="218" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
+              <text x="50" y="9" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="74" y="108" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold" transform="rotate(90,74,108)">{archText}</text>
+              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ Barra R.</text>}
+              {hasRearfootWedge && <text x="83" y="198" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="end">Cuña {cunaRearfootText}</text>}
               {rx.alzaTalon && rx.alzaTalon.pie === "izquierdo" && (
-                <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor} mm</text>
+                <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
               )}
-              <text x="10" y="197" fontSize="4" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+              <text x="11" y="200" fontSize="4" fill="var(--text-muted)" opacity="0.55">Scale 20mm</text>
             </svg>
           </div>
           <div className="diagram-side-box">
             <h5>Pie Derecho</h5>
             <svg viewBox="0 0 100 220" className="insole-svg">
-              <rect width="100" height="220" fill="url(#gridPattern)" />
               {renderInsoleTop(false)}
-              <text x="50" y="215" textAnchor="middle" fontSize="6" fontWeight="bold">TALÓN</text>
-              <text x="50" y="12" textAnchor="middle" fontSize="6" fontWeight="bold">PUNTA</text>
-              <text x="27" y="110" textAnchor="middle" fontSize="5" fill="var(--accent)" transform="rotate(-90, 27, 110)">{archText}</text>
-              {hasMetatarsalPad && <text x="50" y="90" fontSize="5" fill="#d97706" fontWeight="bold" textAnchor="middle">Barra R.</text>}
-              {hasRearfootWedge && <text x="14" y="195" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="end">Cuña V. ({cunaRearfootText}) →</text>}
-              {hasForefootWedge && <text x="12" y="35" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="end">Cuña A. ({cunaForefootText}) →</text>}
+              <text x="50" y="218" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
+              <text x="50" y="9" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="26" y="108" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold" transform="rotate(-90,26,108)">{archText}</text>
+              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ Barra R.</text>}
+              {hasRearfootWedge && <text x="17" y="198" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="start">Cuña {cunaRearfootText}</text>}
               {rx.alzaTalon && rx.alzaTalon.pie === "derecho" && (
-                <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor} mm</text>
+                <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
               )}
-              <text x="90" y="197" textAnchor="end" fontSize="4" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+              <text x="89" y="200" textAnchor="end" fontSize="4" fill="var(--text-muted)" opacity="0.55">Scale 20mm</text>
             </svg>
           </div>
         </div>
       </div>
 
+      {/* Vista lateral */}
       <div className="diagram-card">
-        <h4>Vistas Laterales (Perfiles Mediales)</h4>
+        <h4>Perfiles Laterales Mediales — Cuña y Soporte de Arco</h4>
         <div className="diagrams-dual-row">
           <div className="diagram-side-box">
-            <h5>Pie Izquierdo</h5>
-            <svg viewBox="0 0 200 100" className="insole-svg-wide">
+            <h5>Pie Izquierdo (Vista Medial)</h5>
+            <svg viewBox="0 0 300 130" className="insole-svg-wide">
               {renderInsoleSide(true)}
-              <text x="185" y="82" fontSize="7" fontWeight="bold">PUNTA</text>
-              <text x="15" y="82" textAnchor="start" fontSize="7" fontWeight="bold">TALÓN</text>
-              <text x="100" y={archPeakY} textAnchor="middle" fontSize="6" fill="var(--accent)" fontWeight="bold">{archText}</text>
-              {rx.alzaTalon && rx.alzaTalon.pie === "izquierdo" && (
-                <text x="45" y="93" textAnchor="start" fontSize="6.5" fill="#b45309" fontWeight="bold">Alza de talón +{rx.alzaTalon.valor} mm</text>
-              )}
-              <text x="175" y="20" textAnchor="end" fontSize="5.5" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+              <text x="24" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="248" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
             </svg>
           </div>
           <div className="diagram-side-box">
-            <h5>Pie Derecho</h5>
-            <svg viewBox="0 0 200 100" className="insole-svg-wide">
+            <h5>Pie Derecho (Vista Medial)</h5>
+            <svg viewBox="0 0 300 130" className="insole-svg-wide">
               {renderInsoleSide(false)}
-              <text x="15" y="82" fontSize="7" fontWeight="bold">PUNTA</text>
-              <text x="185" y="82" textAnchor="end" fontSize="7" fontWeight="bold">TALÓN</text>
-              <text x="100" y={archPeakY} textAnchor="middle" fontSize="6" fill="var(--accent)" fontWeight="bold">{archText}</text>
-              {rx.alzaTalon && rx.alzaTalon.pie === "derecho" && (
-                <text x="155" y="93" textAnchor="end" fontSize="6.5" fill="#b45309" fontWeight="bold">Alza de talón +{rx.alzaTalon.valor} mm</text>
-              )}
-              <text x="25" y="20" textAnchor="start" fontSize="5.5" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+              <text x="248" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="24" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
             </svg>
           </div>
         </div>
       </div>
+
+      {/* Leyenda de colores */}
+      <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap", marginTop:"0.75rem", fontSize:"0.78rem", color:"var(--text-muted)" }}>
+        <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
+          <span style={{ display:"inline-block", width:14, height:10, background:"rgba(99,102,241,0.45)", border:"1px solid rgba(99,102,241,0.8)", borderRadius:2 }}></span>
+          Soporte de arco medial ({rx.arcoSoporte})
+        </span>
+        {hasRearfootWedge && (
+          <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
+            <span style={{ display:"inline-block", width:14, height:10, background:"rgba(239,68,68,0.5)", border:"1px solid #dc2626", borderRadius:2 }}></span>
+            Cuña retropié varo ({cunaRearfootText})
+          </span>
+        )}
+        {hasMetatarsalPad && (
+          <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
+            <span style={{ display:"inline-block", width:14, height:10, background:"rgba(245,158,11,0.75)", border:"1px solid #d97706", borderRadius:2 }}></span>
+            Barra retrocapital
+          </span>
+        )}
+        {rx.alzaTalon && (
+          <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
+            <span style={{ display:"inline-block", width:14, height:10, background:"rgba(180,83,9,0.5)", border:"1px solid #b45309", borderRadius:2 }}></span>
+            Alza de talón (+{rx.alzaTalon.valor}mm)
+          </span>
+        )}
+      </div>
+
+      {/* Firma hoja 2 (solo impresión) */}
+      {form && (
+        <div className="print-only signature-block" style={{ marginTop:"3rem" }}>
+          <div className="signature-line">____________________________________</div>
+          <div>{form.especialista || "[Nombre del Especialista]"}</div>
+          <div>{form.especialidad || "[Especialidad]"}</div>
+          {form.especialistaRut && <div>RUT: {form.especialistaRut}</div>}
+          <div style={{ marginTop:"0.25rem" }}>Próximo Control Sugerido: <strong>{rx.fechaControl}</strong></div>
+        </div>
+      )}
     </div>
   );
 }
