@@ -711,11 +711,11 @@ function InsoleDiagram({ rx, form }) {
   // Top view: arch zone opacity by height
   const archOpacity = archMm >= 18 ? 0.95 : archMm >= 15 ? 0.75 : archMm >= 12 ? 0.55 : 0.35;
 
-  // Side view: arch rise in pixels (proportional to mm)
-  const archRisePx = archMm >= 18 ? 30 : archMm >= 15 ? 22 : archMm >= 12 ? 16 : archMm >= 8 ? 11 : 8;
-
-  // Side view: wedge height in pixels
-  const wedgeHpx = hasRearfootWedge ? Math.max(7, Math.min((parseInt(rx.cunaRearfoot) || 0) * 3, 22)) : 0;
+  // Side view: 1px = 0.4mm scale; arch and wedge use same scale so 3:1 ratio is automatic
+  const PX_MM = 2.5;
+  const cunaMm = hasRearfootWedge ? (parseInt(rx.cunaRearfoot) || 0) : 0;
+  const wedgeHpx = cunaMm * PX_MM;                  // e.g. 4mm → 10px
+  const archRisePx = archMm * PX_MM;                // e.g. 12mm → 30px (3× wedge)
 
   // ── VISTA SUPERIOR (top-down, sin copa de talón) ──
   const renderInsoleTop = (isLeft) => {
@@ -797,111 +797,109 @@ function InsoleDiagram({ rx, form }) {
   };
 
   // ── VISTA LATERAL MEDIAL ──
-  // viewBox "0 0 260 100" — TALÓN siempre a la derecha, PUNTA a la izquierda.
-  // Ambos pies misma orientación; las etiquetas PUNTA/TALÓN se ubican fuera.
+  // viewBox "0 0 270 115" — TALÓN a la derecha, PUNTA a la izquierda.
+  // La plantilla tiene grosor uniforme; el arco sube desde la cara SUPERIOR
+  // y la cuña es material extra triangular en la cara INFERIOR del talón.
   const renderInsoleSide = (side) => {
     const isShorter = rx.alzaTalon && rx.alzaTalon.pie === side;
     const liftVal   = isShorter ? rx.alzaTalon.valor : 0;
-    const alzaH     = Math.min(liftVal * 0.9, 18);
-    const totalLift = wedgeHpx + alzaH;
+    const alzaH     = liftVal * PX_MM;
 
-    // Coordenadas fijas (talón a la derecha)
-    const gY       = 88;   // suelo
-    const baseY    = 74;   // cara inferior plantilla (zona sin cuña)
-    const sh       = 6;    // grosor cuerpo plantilla
-    const pX       = 22;   // x de la punta
-    const hX       = 230;  // x del talón
-    const wSX      = 178;  // inicio de cuña bajo el talón
-    const archL    = 65;   // inicio del arco (x)
-    const archR    = 178;  // fin del arco (x)
-    const archMX   = 121;  // pico del arco (x)
-    const archTopY = baseY - sh - archRisePx; // y del pico del arco (cara superior)
-    const hBotY    = baseY - totalLift;       // cara inferior del talón (elevada)
+    // Geometría base (talón a la derecha)
+    const pX    = 24;   // x punta
+    const hX    = 234;  // x talón
+    const wSX   = 172;  // x donde comienza la cuña (transición hacia el talón)
+    const archL = 62;   // x inicio zona arco
+    const archMX= 118;  // x pico del arco
+    const archR = 172;  // x fin zona arco
+
+    const iTopY  = 72;                      // y cara superior (línea de apoyo del pie)
+    const shellH = 8;                       // grosor cuerpo plantilla
+    const iBotY  = iTopY + shellH;          // y cara inferior plana (80)
+    const archPY = iTopY - archRisePx;      // y del pico del arco (proyección hacia ARRIBA)
+    const hBotY  = iBotY + wedgeHpx;        // y cara inferior del talón con cuña
+    const alzaBotY = hBotY + alzaH;         // y cara inferior del talón con alza adicional
+
+    // Trayecto de la cara superior del cuerpo (plana excepto donde sube el arco)
+    // pX → archL: plano | archL → archR: bezier ascendente (arco) | archR → hX: plano
+    const topPath = `M ${pX},${iTopY} L ${archL},${iTopY} C ${archL+20},${iTopY} ${archMX-14},${archPY} ${archMX},${archPY} C ${archMX+14},${archPY} ${archR-20},${iTopY} ${archR},${iTopY} L ${hX},${iTopY}`;
+
+    // Trayecto cara inferior (plana de punta a wSX, luego baja la cuña hasta hX)
+    const botPath = `L ${hX},${hBotY} L ${wSX},${iBotY} L ${pX},${iBotY}`;
+
+    // Path completo del cuerpo (en el orden correcto para cerrar el polígono)
+    const bodyD = `${topPath} ${botPath} Z`;
 
     return (
       <>
         {/* Línea de suelo */}
-        <line x1="10" y1={gY} x2="248" y2={gY} stroke="#bbb" strokeWidth="0.8" strokeDasharray="4,3" opacity="0.6"/>
+        <line x1="8" y1={iBotY + Math.max(wedgeHpx, 0) + alzaH + 6}
+              x2="258" y2={iBotY + Math.max(wedgeHpx, 0) + alzaH + 6}
+              stroke="#bbb" strokeWidth="0.8" strokeDasharray="4,3" opacity="0.5"/>
+
+        {/* Cuerpo de la plantilla */}
+        <path d={bodyD} fill="var(--bg-card)" stroke="var(--accent)" strokeWidth="2"/>
+
+        {/* Cuña retropié — triángulo rojo en la cara INFERIOR del talón */}
+        {wedgeHpx > 0 && (
+          <path
+            d={`M ${wSX},${iBotY} L ${hX},${iBotY} L ${hX},${hBotY} Z`}
+            fill="rgba(239,68,68,0.5)"
+            stroke="#dc2626"
+            strokeWidth="1.8"
+          />
+        )}
 
         {/* Alza de talón por dismetría (capa marrón bajo la cuña) */}
         {alzaH > 0 && (
           <path
-            d={`M ${wSX},${baseY - wedgeHpx} L ${hX},${hBotY - wedgeHpx} L ${hX},${hBotY} L ${wSX},${baseY} Z`}
-            fill="rgba(180,83,9,0.55)"
+            d={`M ${wSX},${hBotY} L ${hX},${hBotY} L ${hX},${alzaBotY} L ${wSX},${alzaBotY} Z`}
+            fill="rgba(180,83,9,0.5)"
             stroke="#b45309"
             strokeWidth="1.2"
             strokeDasharray="4,2"
           />
         )}
 
-        {/* Cuña retropié — triángulo rojo claro bajo el talón */}
-        {wedgeHpx > 0 && (
-          <path
-            d={`M ${wSX},${baseY} L ${hX},${hBotY} L ${hX},${gY} L ${wSX},${gY} Z`}
-            fill="rgba(239,68,68,0.45)"
-            stroke="#dc2626"
-            strokeWidth="1.8"
-          />
-        )}
-
-        {/* Cuerpo de la plantilla */}
+        {/* Relleno zona de arco medial */}
         <path
-          d={`
-            M ${pX},${baseY - sh + 1}
-            C ${pX - 5},${baseY - sh - 1} ${pX - 5},${baseY} ${pX},${baseY - 1}
-            L ${archL},${baseY - 1}
-            C ${archMX - 28},${baseY - 1} ${archMX - 28},${archTopY + 2} ${archMX},${archTopY}
-            C ${archMX + 28},${archTopY + 2} ${wSX},${hBotY - 1} ${hX},${hBotY - 1}
-            C ${hX + 5},${hBotY - 2} ${hX + 5},${hBotY - sh + 1} ${hX},${hBotY - sh}
-            L ${wSX},${hBotY - sh}
-            C ${archMX + 28},${archTopY - sh + 2} ${archMX - 28},${archTopY - sh + 2} ${archMX},${archTopY - sh}
-            C ${archMX - 28},${archTopY - sh + 2} ${archL},${baseY - sh - 1} ${pX},${baseY - sh + 1}
-            Z
-          `}
-          fill="var(--bg-card)"
-          stroke="var(--accent)"
-          strokeWidth="2"
-        />
-
-        {/* Zona del arco medial (relleno azul/violeta) */}
-        <path
-          d={`
-            M ${archL + 8},${baseY - sh - 1}
-            C ${archMX - 24},${archTopY - sh + 4} ${archMX + 24},${archTopY - sh + 4} ${archR - 8},${baseY - sh - 1}
-            Z
-          `}
-          fill="rgba(99,102,241,0.38)"
-          stroke="rgba(99,102,241,0.75)"
+          d={`M ${archL+10},${iTopY} C ${archL+22},${iTopY} ${archMX-12},${archPY+1} ${archMX},${archPY+1} C ${archMX+12},${archPY+1} ${archR-22},${iTopY} ${archR-10},${iTopY} Z`}
+          fill="rgba(99,102,241,0.35)"
+          stroke="rgba(99,102,241,0.7)"
           strokeWidth="1.2"
         />
 
-        {/* Cota de altura del arco */}
-        <line x1={archMX} y1={archTopY - sh - 3} x2={archMX} y2={baseY - sh - 1}
-          stroke="rgba(99,102,241,0.85)" strokeWidth="0.75" strokeDasharray="2,2"/>
-        <line x1={archMX - 5} y1={archTopY - sh - 3} x2={archMX + 5} y2={archTopY - sh - 3}
-          stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
-        <line x1={archMX - 5} y1={baseY - sh - 1} x2={archMX + 5} y2={baseY - sh - 1}
-          stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
-        <text x={archMX} y={archTopY - sh - 7} textAnchor="middle" fontSize="8"
-          fill="rgba(99,102,241,1)" fontWeight="bold">{rx.arcoSoporte}</text>
+        {/* Cota de altura del arco (línea vertical con flechas) */}
+        {archRisePx > 0 && (
+          <>
+            <line x1={archMX} y1={archPY} x2={archMX} y2={iTopY}
+              stroke="rgba(99,102,241,0.9)" strokeWidth="0.8" strokeDasharray="2.5,2"/>
+            <line x1={archMX-5} y1={archPY} x2={archMX+5} y2={archPY}
+              stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
+            <line x1={archMX-5} y1={iTopY} x2={archMX+5} y2={iTopY}
+              stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
+            <text x={archMX-8} y={(archPY + iTopY)/2 + 3} textAnchor="middle" fontSize="8"
+              fill="rgba(99,102,241,1)" fontWeight="bold">{rx.arcoSoporte}</text>
+          </>
+        )}
 
-        {/* Cota de altura de la cuña (a la derecha del talón) */}
+        {/* Cota de la cuña (a la derecha del talón) */}
         {wedgeHpx > 0 && (
           <>
-            <line x1={hX + 9} y1={hBotY} x2={hX + 9} y2={baseY}
-              stroke="#dc2626" strokeWidth="0.75" strokeDasharray="2,2"/>
-            <line x1={hX + 5} y1={hBotY} x2={hX + 13} y2={hBotY}
+            <line x1={hX+9} y1={iBotY} x2={hX+9} y2={hBotY}
+              stroke="#dc2626" strokeWidth="0.8" strokeDasharray="2,2"/>
+            <line x1={hX+5} y1={iBotY} x2={hX+13} y2={iBotY}
               stroke="#dc2626" strokeWidth="1.5"/>
-            <line x1={hX + 5} y1={baseY} x2={hX + 13} y2={baseY}
+            <line x1={hX+5} y1={hBotY} x2={hX+13} y2={hBotY}
               stroke="#dc2626" strokeWidth="1.5"/>
-            <text x={hX + 17} y={(hBotY + baseY) / 2 + 3}
+            <text x={hX+17} y={(iBotY+hBotY)/2+3}
               textAnchor="start" fontSize="7.5" fill="#dc2626" fontWeight="bold">Cuña {cunaRearfootText}</text>
           </>
         )}
 
         {/* Etiqueta alza */}
         {alzaH > 0 && (
-          <text x={hX - 18} y={hBotY - 4} textAnchor="middle" fontSize="7"
+          <text x={hX} y={alzaBotY + 9} textAnchor="middle" fontSize="7"
             fill="#b45309" fontWeight="bold">+{liftVal}mm alza</text>
         )}
       </>
@@ -964,18 +962,18 @@ function InsoleDiagram({ rx, form }) {
         <div className="diagrams-dual-row">
           <div className="diagram-side-box">
             <h5>Pie Izquierdo</h5>
-            <svg viewBox="0 0 260 100" className="insole-svg-wide">
+            <svg viewBox="0 0 270 115" className="insole-svg-wide">
               {renderInsoleSide("izquierdo")}
-              <text x="22" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
-              <text x="230" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
+              <text x="24" y="112" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="234" y="112" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
             </svg>
           </div>
           <div className="diagram-side-box">
             <h5>Pie Derecho</h5>
-            <svg viewBox="0 0 260 100" className="insole-svg-wide">
+            <svg viewBox="0 0 270 115" className="insole-svg-wide">
               {renderInsoleSide("derecho")}
-              <text x="22" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
-              <text x="230" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
+              <text x="24" y="112" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="234" y="112" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
             </svg>
           </div>
         </div>
