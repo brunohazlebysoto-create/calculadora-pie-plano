@@ -796,133 +796,113 @@ function InsoleDiagram({ rx, form }) {
     );
   };
 
-  // ── VISTA LATERAL MEDIAL (perfil con cuña y arco) ──
-  // viewBox 0 0 300 130 — Talón siempre a la DERECHA, punta a la izquierda
-  const renderInsoleSide = (isLeft) => {
-    const side = isLeft ? "izquierdo" : "derecho";
+  // ── VISTA LATERAL MEDIAL ──
+  // viewBox "0 0 260 100" — TALÓN siempre a la derecha, PUNTA a la izquierda.
+  // Ambos pies misma orientación; las etiquetas PUNTA/TALÓN se ubican fuera.
+  const renderInsoleSide = (side) => {
     const isShorter = rx.alzaTalon && rx.alzaTalon.pie === side;
-    const liftVal = isShorter ? rx.alzaTalon.valor : 0;
-    const alzaHpx = Math.min(liftVal * 0.9, 22);
-    const totalLift = wedgeHpx + alzaHpx;
+    const liftVal   = isShorter ? rx.alzaTalon.valor : 0;
+    const alzaH     = Math.min(liftVal * 0.9, 18);
+    const totalLift = wedgeHpx + alzaH;
 
-    // Coordenadas de referencia
-    const gY    = 112;  // línea de suelo
-    const baseY = 94;   // cara inferior plantilla (zona plana)
-    const shellH = 7;   // grosor del cuerpo de la plantilla
-    const puntaX = 24;
-    const heelX  = 248;
-    const wedgeSX = 188; // inicio de la cuña
-    const archL   = 70;
-    const archR   = 188;
-    const archMidX = 128;
-    const archTopY = baseY - shellH - archRisePx; // pico del arco (cara superior)
-    const heelBotY = baseY - totalLift;           // cara inferior talón (elevada por cuña)
-
-    // Para el pie derecho se espejea horizontalmente toda la figura,
-    // EXCEPTO los textos de anotación que se recalculan en coordenadas de pantalla.
-    const flip = isLeft ? "" : `translate(300,0) scale(-1,1)`;
-
-    // Posiciones de texto en coordenadas de pantalla (ya corregidas para espejo)
-    const scrHeelX  = isLeft ? heelX  : 300 - heelX;
-    const scrArchMX = isLeft ? archMidX : 300 - archMidX;
-    const wedgeTextX = isLeft ? heelX + 14 : 300 - heelX - 14;
-    const wedgeTextAnchor = isLeft ? "start" : "end";
-    const alzaTextX = isLeft ? heelX - 30 : 300 - heelX + 30;
+    // Coordenadas fijas (talón a la derecha)
+    const gY       = 88;   // suelo
+    const baseY    = 74;   // cara inferior plantilla (zona sin cuña)
+    const sh       = 6;    // grosor cuerpo plantilla
+    const pX       = 22;   // x de la punta
+    const hX       = 230;  // x del talón
+    const wSX      = 178;  // inicio de cuña bajo el talón
+    const archL    = 65;   // inicio del arco (x)
+    const archR    = 178;  // fin del arco (x)
+    const archMX   = 121;  // pico del arco (x)
+    const archTopY = baseY - sh - archRisePx; // y del pico del arco (cara superior)
+    const hBotY    = baseY - totalLift;       // cara inferior del talón (elevada)
 
     return (
       <>
-        {/* ── Formas (espejadas para pie derecho) ── */}
-        <g transform={flip}>
-          {/* Línea de suelo */}
-          <line x1="10" y1={gY} x2="290" y2={gY} stroke="#aaa" strokeWidth="0.8" strokeDasharray="5,3" opacity="0.5"/>
+        {/* Línea de suelo */}
+        <line x1="10" y1={gY} x2="248" y2={gY} stroke="#bbb" strokeWidth="0.8" strokeDasharray="4,3" opacity="0.6"/>
 
-          {/* Cuña retropié (triángulo rojo bajo el talón) */}
-          {wedgeHpx > 0 && (
-            <path
-              d={`M ${wedgeSX},${baseY} L ${heelX},${heelBotY} L ${heelX},${gY} L ${wedgeSX},${gY} Z`}
-              fill="rgba(239,68,68,0.55)"
-              stroke="#dc2626"
-              strokeWidth="1.8"
-            />
-          )}
-
-          {/* Alza de talón (marrón, adicional a la cuña) */}
-          {alzaHpx > 0 && (
-            <path
-              d={`M ${wedgeSX},${baseY - wedgeHpx} L ${heelX},${heelBotY - wedgeHpx} L ${heelX},${heelBotY} L ${wedgeSX},${baseY} Z`}
-              fill="rgba(180,83,9,0.6)"
-              stroke="#b45309"
-              strokeWidth="1.5"
-              strokeDasharray="4,2"
-            />
-          )}
-
-          {/* Cuerpo de la plantilla */}
+        {/* Alza de talón por dismetría (capa marrón bajo la cuña) */}
+        {alzaH > 0 && (
           <path
-            d={`
-              M ${puntaX},${baseY - shellH + 2}
-              C 46,${baseY - shellH - 1} ${archL + 5},${archTopY + archRisePx * 0.85} ${archMidX},${archTopY}
-              C ${archMidX + 30},${archTopY} ${wedgeSX - 18},${heelBotY - shellH} ${wedgeSX},${heelBotY - shellH}
-              L ${heelX},${heelBotY - shellH}
-              C ${heelX + 6},${heelBotY - shellH - 4} ${heelX + 6},${heelBotY + 2} ${heelX},${heelBotY}
-              L ${wedgeSX},${baseY}
-              C ${wedgeSX - 18},${baseY} ${archMidX + 30},${baseY - 2} ${archMidX},${baseY - 2}
-              C ${archL + 5},${baseY - 2} 46,${baseY - 2} ${puntaX},${baseY - 2}
-              C ${puntaX - 6},${baseY - 3} ${puntaX - 6},${baseY - shellH + 3} ${puntaX},${baseY - shellH + 2}
-              Z
-            `}
-            fill="var(--bg-card)"
-            stroke="var(--accent)"
-            strokeWidth="2"
-          />
-
-          {/* Relleno zona arco */}
-          <path
-            d={`
-              M ${archL + 10},${baseY - shellH - 1}
-              C ${archMidX - 30},${archTopY + 4} ${archMidX + 30},${archTopY + 4} ${archR - 10},${baseY - shellH - 1}
-              Z
-            `}
-            fill="rgba(99,102,241,0.38)"
-            stroke="rgba(99,102,241,0.7)"
+            d={`M ${wSX},${baseY - wedgeHpx} L ${hX},${hBotY - wedgeHpx} L ${hX},${hBotY} L ${wSX},${baseY} Z`}
+            fill="rgba(180,83,9,0.55)"
+            stroke="#b45309"
             strokeWidth="1.2"
+            strokeDasharray="4,2"
           />
-        </g>
+        )}
 
-        {/* ── Anotaciones (en coordenadas de pantalla, sin espejo) ── */}
+        {/* Cuña retropié — triángulo rojo claro bajo el talón */}
+        {wedgeHpx > 0 && (
+          <path
+            d={`M ${wSX},${baseY} L ${hX},${hBotY} L ${hX},${gY} L ${wSX},${gY} Z`}
+            fill="rgba(239,68,68,0.45)"
+            stroke="#dc2626"
+            strokeWidth="1.8"
+          />
+        )}
+
+        {/* Cuerpo de la plantilla */}
+        <path
+          d={`
+            M ${pX},${baseY - sh + 1}
+            C ${pX - 5},${baseY - sh - 1} ${pX - 5},${baseY} ${pX},${baseY - 1}
+            L ${archL},${baseY - 1}
+            C ${archMX - 28},${baseY - 1} ${archMX - 28},${archTopY + 2} ${archMX},${archTopY}
+            C ${archMX + 28},${archTopY + 2} ${wSX},${hBotY - 1} ${hX},${hBotY - 1}
+            C ${hX + 5},${hBotY - 2} ${hX + 5},${hBotY - sh + 1} ${hX},${hBotY - sh}
+            L ${wSX},${hBotY - sh}
+            C ${archMX + 28},${archTopY - sh + 2} ${archMX - 28},${archTopY - sh + 2} ${archMX},${archTopY - sh}
+            C ${archMX - 28},${archTopY - sh + 2} ${archL},${baseY - sh - 1} ${pX},${baseY - sh + 1}
+            Z
+          `}
+          fill="var(--bg-card)"
+          stroke="var(--accent)"
+          strokeWidth="2"
+        />
+
+        {/* Zona del arco medial (relleno azul/violeta) */}
+        <path
+          d={`
+            M ${archL + 8},${baseY - sh - 1}
+            C ${archMX - 24},${archTopY - sh + 4} ${archMX + 24},${archTopY - sh + 4} ${archR - 8},${baseY - sh - 1}
+            Z
+          `}
+          fill="rgba(99,102,241,0.38)"
+          stroke="rgba(99,102,241,0.75)"
+          strokeWidth="1.2"
+        />
 
         {/* Cota de altura del arco */}
-        <line x1={scrArchMX} y1={archTopY - 3} x2={scrArchMX} y2={baseY - shellH - 1}
-          stroke="rgba(99,102,241,0.85)" strokeWidth="0.8" strokeDasharray="2,2"/>
-        <line x1={scrArchMX - 6} y1={archTopY - 3} x2={scrArchMX + 6} y2={archTopY - 3}
+        <line x1={archMX} y1={archTopY - sh - 3} x2={archMX} y2={baseY - sh - 1}
+          stroke="rgba(99,102,241,0.85)" strokeWidth="0.75" strokeDasharray="2,2"/>
+        <line x1={archMX - 5} y1={archTopY - sh - 3} x2={archMX + 5} y2={archTopY - sh - 3}
           stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
-        <line x1={scrArchMX - 6} y1={baseY - shellH - 1} x2={scrArchMX + 6} y2={baseY - shellH - 1}
+        <line x1={archMX - 5} y1={baseY - sh - 1} x2={archMX + 5} y2={baseY - sh - 1}
           stroke="rgba(99,102,241,1)" strokeWidth="1.5"/>
-        <text x={scrArchMX} y={archTopY - 7} textAnchor="middle" fontSize="8.5"
-          fill="rgba(99,102,241,1)" fontWeight="bold" fontFamily="monospace">{rx.arcoSoporte}</text>
+        <text x={archMX} y={archTopY - sh - 7} textAnchor="middle" fontSize="8"
+          fill="rgba(99,102,241,1)" fontWeight="bold">{rx.arcoSoporte}</text>
 
-        {/* Cota de cuña */}
+        {/* Cota de altura de la cuña (a la derecha del talón) */}
         {wedgeHpx > 0 && (
           <>
-            <line x1={scrHeelX + (isLeft ? 11 : -11)} y1={heelBotY}
-                  x2={scrHeelX + (isLeft ? 11 : -11)} y2={baseY}
-              stroke="#dc2626" strokeWidth="0.8" strokeDasharray="2,2"/>
-            <line x1={scrHeelX + (isLeft ? 6 : -6)} y1={heelBotY}
-                  x2={scrHeelX + (isLeft ? 16 : -16)} y2={heelBotY}
-              stroke="#dc2626" strokeWidth="1.8"/>
-            <line x1={scrHeelX + (isLeft ? 6 : -6)} y1={baseY}
-                  x2={scrHeelX + (isLeft ? 16 : -16)} y2={baseY}
-              stroke="#dc2626" strokeWidth="1.8"/>
-            <text x={wedgeTextX} y={(heelBotY + baseY) / 2 + 3.5}
-              textAnchor={wedgeTextAnchor} fontSize="7.5"
-              fill="#dc2626" fontWeight="bold" fontFamily="monospace">Cuña {cunaRearfootText}</text>
+            <line x1={hX + 9} y1={hBotY} x2={hX + 9} y2={baseY}
+              stroke="#dc2626" strokeWidth="0.75" strokeDasharray="2,2"/>
+            <line x1={hX + 5} y1={hBotY} x2={hX + 13} y2={hBotY}
+              stroke="#dc2626" strokeWidth="1.5"/>
+            <line x1={hX + 5} y1={baseY} x2={hX + 13} y2={baseY}
+              stroke="#dc2626" strokeWidth="1.5"/>
+            <text x={hX + 17} y={(hBotY + baseY) / 2 + 3}
+              textAnchor="start" fontSize="7.5" fill="#dc2626" fontWeight="bold">Cuña {cunaRearfootText}</text>
           </>
         )}
 
-        {/* Alza de talón label */}
-        {alzaHpx > 0 && (
-          <text x={alzaTextX} y={heelBotY - 5} textAnchor="middle" fontSize="7"
-            fill="#b45309" fontWeight="bold">+{liftVal} mm alza</text>
+        {/* Etiqueta alza */}
+        {alzaH > 0 && (
+          <text x={hX - 18} y={hBotY - 4} textAnchor="middle" fontSize="7"
+            fill="#b45309" fontWeight="bold">+{liftVal}mm alza</text>
         )}
       </>
     );
@@ -983,19 +963,19 @@ function InsoleDiagram({ rx, form }) {
         <h4>Perfiles Laterales Mediales — Cuña y Soporte de Arco</h4>
         <div className="diagrams-dual-row">
           <div className="diagram-side-box">
-            <h5>Pie Izquierdo (Vista Medial)</h5>
-            <svg viewBox="0 0 300 130" className="insole-svg-wide">
-              {renderInsoleSide(true)}
-              <text x="24" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
-              <text x="248" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
+            <h5>Pie Izquierdo</h5>
+            <svg viewBox="0 0 260 100" className="insole-svg-wide">
+              {renderInsoleSide("izquierdo")}
+              <text x="22" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="230" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
             </svg>
           </div>
           <div className="diagram-side-box">
-            <h5>Pie Derecho (Vista Medial)</h5>
-            <svg viewBox="0 0 300 130" className="insole-svg-wide">
-              {renderInsoleSide(false)}
-              <text x="248" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
-              <text x="24" y="127" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
+            <h5>Pie Derecho</h5>
+            <svg viewBox="0 0 260 100" className="insole-svg-wide">
+              {renderInsoleSide("derecho")}
+              <text x="22" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
+              <text x="230" y="97" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
             </svg>
           </div>
         </div>
