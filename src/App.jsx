@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { generatePrescription, GRADES } from "./prescriptionEngine";
+import SeccionPadres from "./SeccionPadres";
 import "./App.css";
 
 const REGISTRY_KEY = "plantillas_registry";
@@ -108,6 +109,9 @@ export default function App() {
           </button>
           <button className={tab === "guia" ? "active" : ""} onClick={() => setTab("guia")}>
             Guía Clínica
+          </button>
+          <button className={tab === "padres" ? "active" : ""} onClick={() => setTab("padres")}>
+            Para Padres
           </button>
         </nav>
       </header>
@@ -316,6 +320,7 @@ export default function App() {
       )}
 
       {tab === "guia" && <GuiaClinica />}
+      {tab === "padres" && <SeccionPadres />}
 
       <footer>
         <p>
