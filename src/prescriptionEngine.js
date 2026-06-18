@@ -42,16 +42,44 @@ export function generatePrescription({ talla, edad, grado, sintomas, flexible })
 
   const sizeCategory = getShoeSizeCategory(talla);
 
-  // Asymptomatic children under 6 with physiological flat foot
-  if (edad < 7 && !sintomas && grado === GRADES.LEVE) {
+  // Under 5: no indication regardless (purely physiological)
+  if (edad < 5 && !sintomas && grado === GRADES.LEVE) {
     return {
       indicacion: false,
       mensaje:
-        "Pie plano fisiológico en desarrollo. No se indica plantilla. El arco plantar continúa desarrollándose hasta los 6-7 años. Se recomienda control periódico anual.",
+        "Pie plano fisiológico en desarrollo. Menor de 5 años sin síntomas: no se indica plantilla. El arco plantar se forma entre los 3 y 6 años.",
       recomendaciones: [
-        "Evitar calzado con suela rígida",
         "Estimular marcha descalza en superficies naturales",
+        "Evitar calzado con suela rígida",
         "Control anual o si aparecen síntomas",
+      ],
+    };
+  }
+
+  // 5-6 years, asymptomatic, mild: safe supportive insole (no correction, no harm)
+  if (edad >= 5 && edad <= 6 && !sintomas && grado === GRADES.LEVE) {
+    return {
+      indicacion: true,
+      tipo: "Plantilla de acompañamiento pediátrica (no correctiva)",
+      arcoSoporte: "Relleno suave y bajo — acompañamiento, no corrección",
+      taconeraAltura: "8-10 mm, copa superficial",
+      cunaRearfoot: "0° — sin cuña (no interferir con desarrollo natural)",
+      cunaForefoot: "0°",
+      flandeMedal: "Mínimo",
+      padMetatarsal: false,
+      material: "EVA blando 10 mm densidad baja (Shore 30-35°)",
+      longitud: "Longitud completa",
+      notas: [
+        "Plantilla de acompañamiento: proporciona comodidad y confort sin forzar corrección angular.",
+        "Sin cuñas ni posteo para no interferir con el desarrollo espontáneo del arco.",
+        "Diseño pensado para tranquilizar a los padres sin perjudicar al niño.",
+        "Si aparecen síntomas o el pie no desarrolla arco después de los 7 años, reevaluar con protocolo correctivo.",
+      ],
+      controles: "Control anual",
+      fundamentacion: [
+        "Revisión Cochrane: no hay evidencia de beneficio de ortesis en pie plano asintomático pediátrico.",
+        "Consenso: plantilla blanda sin corrección no perjudica el desarrollo del arco (PMC9561439).",
+        "Límite clínico establecido en 5 años según criterio del prescriptor.",
       ],
     };
   }
