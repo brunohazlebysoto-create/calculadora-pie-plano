@@ -294,6 +294,60 @@ export default function SeccionPadres() {
           En niños pequeños actúa principalmente como apoyo de comodidad.
         </p>
       </div>
+
+      {/* INSTRUCTIVO DE USO, RECONSULTA Y CONTROLES */}
+      <div className="padres-card">
+        <h3>6. Instructivo de Adaptación Gradual y Uso</h3>
+        <div className="mejoria-lista">
+          <div className="mejoria-item blue">
+            <span className="mi-icon">⏱️</span>
+            <div>
+              <strong>Período de adaptación gradual:</strong>
+              <ul style={{ paddingLeft: "1.2rem", marginTop: "0.25rem" }}>
+                <li><strong>Día 1:</strong> Usar durante 1 a 2 horas únicamente.</li>
+                <li><strong>Día 2:</strong> Usar durante 2 a 3 horas.</li>
+                <li><strong>Día 3:</strong> Usar de 4 a 5 horas.</li>
+                <li><strong>Día 4 en adelante:</strong> Uso a tiempo completo si no hay molestias.</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mejoria-item green">
+            <span className="mi-icon">✓</span>
+            <div>
+              <strong>Calzado adecuado:</strong> El calzado debe ser firme en el talón (contrafuerte estable), ancho en la parte delantera para no aprisionar los dedos, y preferiblemente contar con plantilla extraíble para reemplazarla por la ortesis.
+            </div>
+          </div>
+          <div className="mejoria-item orange">
+            <span className="mi-icon">!</span>
+            <div>
+              <strong>Mantenimiento e higiene:</strong> Limpiar con un paño húmedo y jabón suave. No sumergir en agua ni secar al sol directo o con secadores, ya que las temperaturas altas deforman materiales termosensibles como la EVA o el Polipropileno.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="padres-card">
+        <h3>7. Cronograma de Controles y Cuándo Reconsultar</h3>
+        <div className="semaforo-grid">
+          <div className="semaforo-card verde">
+            <div className="semaforo-dot verde-dot"></div>
+            <h4>Cronograma de Seguimiento</h4>
+            <ul style={{ paddingLeft: "1.1rem" }}>
+              <li><strong>Control Inicial (3 Meses):</strong> Evaluación obligatoria a los 3 meses del uso inicial para verificar la tolerancia, adaptación de los materiales a la pisada y evolución de la marcha.</li>
+              <li><strong>Controles Anuales:</strong> Posteriormente, control cada 1 año para evaluar si el pie ha crecido (cambio de talla) y el progreso clínico del arco plantar.</li>
+            </ul>
+          </div>
+          <div className="semaforo-card rojo">
+            <div className="semaforo-dot rojo-dot"></div>
+            <h4>Signos de Alarma (Reconsultar)</h4>
+            <ul style={{ paddingLeft: "1.1rem" }}>
+              <li>Enrojecimiento continuo de la piel, dolor localizado persistente o ampollas en la zona del arco medial o talón.</li>
+              <li>Dolor que empeora o que no desaparece tras las primeras 2 semanas de uso gradual.</li>
+              <li>Pérdida evidente de la altura o forma del arco de la plantilla (deformación del material).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }
