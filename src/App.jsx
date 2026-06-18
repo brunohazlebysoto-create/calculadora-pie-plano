@@ -377,7 +377,7 @@ export default function App() {
                     <RxItem label="Cuña Retropié" value={result.cunaRearfoot} />
                     <RxItem label="Cuña Antepié" value={result.cunaForefoot} />
                     <RxItem label="Flanco Medial" value={result.flandeMedal} />
-                    <RxItem label="Barra Retrocapital" value={result.padMetatarsal ? "4 mm" : "No"} />
+                    <RxItem label="Barra Retrocapital" value={result.barraRetrocapitalMm > 0 ? `${result.barraRetrocapitalMm} mm` : "No"} />
                     <RxItem label="Material" value={result.material} className="print-hide" />
                     <RxItem label="Longitud" value={result.longitud} className="print-hide" />
                     <RxItem label="Controles" value={result.controles} className="print-hide" />
@@ -700,7 +700,7 @@ function GuiaClinica() {
 function InsoleDiagram({ rx, form }) {
   if (!rx || !rx.indicacion) return null;
 
-  const hasMetatarsalPad = !!rx.padMetatarsal;
+  const hasMetatarsalPad = rx.barraRetrocapitalMm > 0;
   const hasRearfootWedge = rx.cunaRearfoot && rx.cunaRearfoot !== "0°" && rx.cunaRearfoot !== "0 mm" && !rx.cunaRearfoot.includes("sin cuña") && rx.cunaRearfoot !== "0";
   const cunaRearfootText = hasRearfootWedge ? rx.cunaRearfoot : "";
   const hasForefootWedge = rx.cunaForefoot && rx.cunaForefoot !== "0°" && rx.cunaForefoot !== "0 mm" && rx.cunaForefoot !== "0";
@@ -932,7 +932,7 @@ function InsoleDiagram({ rx, form }) {
               <text x="50" y="218" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
               <text x="50" y="9" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
               <text x="74" y="108" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold" transform="rotate(90,74,108)">{archText}</text>
-              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ Barra R.</text>}
+              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ B.R. {rx.barraRetrocapitalMm}mm</text>}
               {hasRearfootWedge && <text x="83" y="198" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="end">Cuña {cunaRearfootText}</text>}
               {rx.alzaTalon && rx.alzaTalon.pie === "izquierdo" && (
                 <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
@@ -947,7 +947,7 @@ function InsoleDiagram({ rx, form }) {
               <text x="50" y="218" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
               <text x="50" y="9" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
               <text x="26" y="108" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold" transform="rotate(-90,26,108)">{archText}</text>
-              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ Barra R.</text>}
+              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ B.R. {rx.barraRetrocapitalMm}mm</text>}
               {hasRearfootWedge && <text x="17" y="198" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="start">Cuña {cunaRearfootText}</text>}
               {rx.alzaTalon && rx.alzaTalon.pie === "derecho" && (
                 <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
@@ -996,7 +996,7 @@ function InsoleDiagram({ rx, form }) {
         {hasMetatarsalPad && (
           <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
             <span style={{ display:"inline-block", width:14, height:10, background:"rgba(245,158,11,0.75)", border:"1px solid #d97706", borderRadius:2 }}></span>
-            Barra retrocapital
+            Barra retrocapital ({rx.barraRetrocapitalMm} mm)
           </span>
         )}
         {rx.alzaTalon && (
