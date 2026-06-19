@@ -736,12 +736,12 @@ function InsoleDiagram({ rx, form }) {
         {/* Eje central */}
         <line x1="50" y1="12" x2="50" y2="208" stroke="var(--text-muted)" strokeWidth="0.4" strokeDasharray="4,3" opacity="0.2"/>
 
-        {/* Zona de soporte de arco medial */}
+        {/* Zona de soporte de arco medial (más amplia y visible) */}
         <path
-          d="M24 148 C19 118 26 88 24 66 C31 70 37 96 36 122 C35 137 30 145 24 148 Z"
+          d="M24 155 C17 128 18 98 22 72 C22 62 23 52 24 44 C33 52 38 78 38 105 C38 128 33 148 24 155 Z"
           fill="rgba(99,102,241,0.5)"
           stroke="rgba(99,102,241,0.85)"
-          strokeWidth="1.2"
+          strokeWidth="1.4"
           opacity={archOpacity}
         />
 

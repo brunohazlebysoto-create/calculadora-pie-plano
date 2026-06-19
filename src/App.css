@@ -1019,18 +1019,44 @@ footer br {
   .insole-diagrams {
     page-break-inside: avoid;
     border-top: 2px solid #ccc !important;
-    margin-top: 1rem !important;
-    padding-top: 1rem !important;
+    margin-top: 0.5rem !important;
+    padding-top: 0.5rem !important;
+  }
+
+  .insole-diagrams h3 {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.3rem !important;
   }
 
   .diagram-card {
     background: transparent !important;
     border: 1px solid #ccc !important;
+    padding: 0.4rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  .diagram-card h4 {
+    font-size: 0.72rem !important;
+    margin-bottom: 0.3rem !important;
   }
 
   .diagram-side-box {
     background: transparent !important;
     border: 1px solid #ccc !important;
+    padding: 0.3rem !important;
+  }
+
+  .diagram-side-box h5 {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .insole-svg {
+    max-height: 155px !important;
+  }
+
+  .insole-svg-wide {
+    max-height: 100px !important;
   }
 
   /* Firma y Sello en HTML */
