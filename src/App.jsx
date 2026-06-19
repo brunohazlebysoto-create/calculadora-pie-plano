@@ -29,12 +29,14 @@ export default function App() {
   const [tab, setTab] = useState("nueva");
   const [form, setForm] = useState({
     paciente: "",
+    tipoPie: "plano",
     talla: "",
     edad: "",
     grado: GRADES.LEVE,
     sintomas: true,
     flexible: true,
     barraRetrocapital: false,
+    testColeman: "positivo",
     dismetriaActiva: false,
     dismetriaPie: "izquierdo",
     dismetriaValor: "5",
@@ -85,12 +87,14 @@ export default function App() {
       return;
     }
     const rx = generatePrescription({
+      tipoPie: form.tipoPie,
       talla,
       edad,
       grado: form.grado,
       sintomas: form.sintomas,
       flexible: form.flexible,
       barraRetrocapital: form.barraRetrocapital,
+      testColeman: form.testColeman,
       dismetriaActiva: form.dismetriaActiva,
       dismetriaPie: form.dismetriaPie,
       dismetriaValor: parseInt(form.dismetriaValor) || 0,
@@ -154,7 +158,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>Calculadora de Plantillas — Pie Plano</h1>
+        <h1>Calculadora de Plantillas — Pie Plano y Cavo</h1>
         <p className="subtitle">Prescripción basada en evidencia clínica</p>
         <nav>
           <button className={tab === "nueva" ? "active" : ""} onClick={() => setTab("nueva")}>
@@ -177,6 +181,21 @@ export default function App() {
           <section className="form-section">
             <h2>Datos del Paciente</h2>
             <form onSubmit={handleCalcular}>
+              {/* ── Tipo de pie ── */}
+              <fieldset style={{ marginBottom: "1rem" }}>
+                <legend>Tipo de Pie *</legend>
+                <div style={{ display: "flex", gap: "1rem", marginTop: "0.4rem" }}>
+                  <label className="checkbox-label" style={{ fontWeight: form.tipoPie === "plano" ? "700" : "400" }}>
+                    <input type="radio" name="tipoPie" value="plano" checked={form.tipoPie === "plano"} onChange={handleChange} />
+                    Pie Plano (Valgus)
+                  </label>
+                  <label className="checkbox-label" style={{ fontWeight: form.tipoPie === "cavo" ? "700" : "400" }}>
+                    <input type="radio" name="tipoPie" value="cavo" checked={form.tipoPie === "cavo"} onChange={handleChange} />
+                    Pie Cavo (Varus)
+                  </label>
+                </div>
+              </fieldset>
+
               <label>
                 Paciente (opcional)
                 <input
@@ -216,43 +235,54 @@ export default function App() {
               </label>
 
               <label>
-                Grado de Pie Plano *
+                Grado de Deformidad *
                 <select name="grado" value={form.grado} onChange={handleChange}>
-                  <option value={GRADES.LEVE}>Leve (I) — Huella con leve contacto medial</option>
-                  <option value={GRADES.MODERADO}>Moderado (II) — Colapso del arco visible</option>
-                  <option value={GRADES.SEVERO}>Severo (III) — Colapso total, talón valgo marcado</option>
+                  {form.tipoPie === "plano" ? (
+                    <>
+                      <option value={GRADES.LEVE}>Leve (I) — Huella con leve contacto medial</option>
+                      <option value={GRADES.MODERADO}>Moderado (II) — Colapso del arco visible</option>
+                      <option value={GRADES.SEVERO}>Severo (III) — Colapso total, talón valgo marcado</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value={GRADES.LEVE}>Leve (I) — Arco elevado leve, apoyo plantar casi normal</option>
+                      <option value={GRADES.MODERADO}>Moderado (II) — Arco muy elevado, callo bajo cabezas metatarsales</option>
+                      <option value={GRADES.SEVERO}>Severo (III) — Garra digital, sobrecarga metatarsal severa</option>
+                    </>
+                  )}
                 </select>
               </label>
 
               <fieldset>
                 <legend>Características clínicas</legend>
                 <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="sintomas"
-                    checked={form.sintomas}
-                    onChange={handleChange}
-                  />
+                  <input type="checkbox" name="sintomas" checked={form.sintomas} onChange={handleChange} />
                   Presenta síntomas (dolor, fatiga, limitación funcional)
                 </label>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="flexible"
-                    checked={form.flexible}
-                    onChange={handleChange}
-                  />
-                  Pie plano flexible (el arco aparece al ponerse en puntillas)
-                </label>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="barraRetrocapital"
-                    checked={form.barraRetrocapital}
-                    onChange={handleChange}
-                  />
-                  Incluir barra retrocapital (descarga metatarsal)
-                </label>
+
+                {form.tipoPie === "plano" && (
+                  <>
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="flexible" checked={form.flexible} onChange={handleChange} />
+                      Pie plano flexible — Test de Jack positivo (el arco aparece al ponerse en puntillas)
+                    </label>
+                    <label className="checkbox-label">
+                      <input type="checkbox" name="barraRetrocapital" checked={form.barraRetrocapital} onChange={handleChange} />
+                      Incluir barra retrocapital (descarga metatarsal, solo ≥ 8 años)
+                    </label>
+                  </>
+                )}
+
+                {form.tipoPie === "cavo" && (
+                  <label style={{ marginTop: "0.5rem", display: "block" }}>
+                    Test de Coleman *
+                    <select name="testColeman" value={form.testColeman} onChange={handleChange} style={{ marginTop: "0.25rem" }}>
+                      <option value="positivo">Positivo — Retropié flexible (cuña externa)</option>
+                      <option value="negativo">Negativo — Retropié rígido (cuña interna)</option>
+                    </select>
+                    <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Coleman +: el talón corrige al liberar el antepié; Coleman −: el talón no corrige (retropié rígido)</small>
+                  </label>
+                )}
               </fieldset>
 
               <fieldset>
@@ -373,11 +403,12 @@ export default function App() {
 
                   <div className="rx-grid">
                     <RxItem label="Tipo de Ortesis" value={result.tipo} highlight={true} />
-                    <RxItem label="Soporte de Arco" value={result.arcoSoporte} />
+                    <RxItem label={result.tipoPie === "cavo" ? "Soporte de Arco Lateral" : "Soporte de Arco Medial"} value={result.arcoSoporte} />
                     <RxItem label="Cuña Retropié" value={result.cunaRearfoot} />
-                    <RxItem label="Cuña Antepié" value={result.cunaForefoot} />
-                    <RxItem label="Flanco Medial" value={result.flandeMedal} />
+                    {result.tipoPie !== "cavo" && <RxItem label="Cuña Antepié" value={result.cunaForefoot} />}
+                    {result.tipoPie !== "cavo" && <RxItem label="Flanco Medial" value={result.flandeMedal} />}
                     <RxItem label="Barra Retrocapital" value={result.barraRetrocapitalMm > 0 ? `${result.barraRetrocapitalMm} mm` : "No"} />
+                    {result.tipoPie === "cavo" && <RxItem label="Descarga 1er Radio" value={result.cutOut ? "Cut-out bajo 1er metatarsiano" : "No"} />}
                     <RxItem label="Material" value={result.material} className="print-hide" />
                     <RxItem label="Longitud" value={result.longitud} className="print-hide" />
                     <RxItem label="Controles" value={result.controles} className="print-hide" />
@@ -706,7 +737,7 @@ function InsoleDiagram({ rx, form }) {
   const hasForefootWedge = rx.cunaForefoot && rx.cunaForefoot !== "0°" && rx.cunaForefoot !== "0 mm" && rx.cunaForefoot !== "0";
 
   const archMm = parseInt(rx.arcoSoporte) || 0;
-  const archText = `Arco: ${rx.arcoSoporte}`;
+  const archText = rx.tipoPie === "cavo" ? `Arco Lat: ${rx.arcoSoporte}` : `Arco Med: ${rx.arcoSoporte}`;
 
   // Top view: arch zone opacity by height
   const archOpacity = archMm >= 18 ? 0.95 : archMm >= 15 ? 0.75 : archMm >= 12 ? 0.55 : 0.35;
@@ -736,43 +767,87 @@ function InsoleDiagram({ rx, form }) {
         {/* Eje central */}
         <line x1="50" y1="12" x2="50" y2="208" stroke="var(--text-muted)" strokeWidth="0.4" strokeDasharray="4,3" opacity="0.2"/>
 
-        {/* Zona de soporte de arco medial — borde medial interno, bien dentro del contorno */}
-        <path
-          d="M26 158 C22 135 22 108 24 82 C24 70 25 60 26 50 C34 56 40 80 40 108 C40 132 36 152 26 158 Z"
-          fill="rgba(99,102,241,0.5)"
-          stroke="rgba(99,102,241,0.85)"
-          strokeWidth="1.4"
-          opacity={archOpacity}
-        />
-
-        {/* Zona de cuña retropié (triángulo medial talón) */}
-        {hasRearfootWedge && (
-          <path
-            d="M50 210 C38 210 26 196 24 168 C30 163 38 172 42 186 C45 196 50 210 50 210 Z"
-            fill="rgba(239,68,68,0.55)"
-            stroke="#dc2626"
-            strokeWidth="1.5"
-          />
-        )}
-
-        {/* Barra retrocapital */}
-        {hasMetatarsalPad && (
-          <path
-            d="M27 83 C27 79 73 79 73 83 C73 87 27 87 27 83 Z"
-            fill="rgba(245,158,11,0.8)"
-            stroke="#d97706"
-            strokeWidth="1.5"
-          />
-        )}
-
-        {/* Cuña antepié */}
-        {hasForefootWedge && (
-          <path
-            d="M27 68 C24 50 24 30 32 18 C35 28 34 50 32 58 Z"
-            fill="rgba(239,68,68,0.35)"
-            stroke="#ef4444"
-            strokeWidth="1"
-          />
+        {rx.tipoPie === "cavo" ? (
+          <>
+            {/* CAVO: arco LATERAL (lado derecho en orientación estándar) */}
+            <path
+              d="M74 158 C78 135 78 108 76 82 C76 70 75 60 74 50 C66 56 60 80 60 108 C60 132 64 152 74 158 Z"
+              fill="rgba(99,102,241,0.5)"
+              stroke="rgba(99,102,241,0.85)"
+              strokeWidth="1.4"
+              opacity={archOpacity}
+            />
+            {/* CAVO: cut-out bajo 1er radio (elipse medial antepié) */}
+            {rx.cutOut && (
+              <ellipse cx="33" cy="62" rx="8" ry="13"
+                fill="rgba(234,179,8,0.35)" stroke="#ca8a04" strokeWidth="1.4" strokeDasharray="3,1.5"/>
+            )}
+            {/* CAVO: cuña externa (lateral talón) */}
+            {hasRearfootWedge && cunaRearfootText.includes("Ext") && (
+              <path
+                d="M50 210 C62 210 74 196 76 168 C70 163 62 172 58 186 C55 196 50 210 50 210 Z"
+                fill="rgba(239,68,68,0.55)"
+                stroke="#dc2626"
+                strokeWidth="1.5"
+              />
+            )}
+            {/* CAVO: cuña interna (medial talón) */}
+            {hasRearfootWedge && cunaRearfootText.includes("Int") && (
+              <path
+                d="M50 210 C38 210 26 196 24 168 C30 163 38 172 42 186 C45 196 50 210 50 210 Z"
+                fill="rgba(239,68,68,0.55)"
+                stroke="#dc2626"
+                strokeWidth="1.5"
+              />
+            )}
+            {/* CAVO: barra retrocapital */}
+            {hasMetatarsalPad && (
+              <path
+                d="M27 83 C27 79 73 79 73 83 C73 87 27 87 27 83 Z"
+                fill="rgba(245,158,11,0.8)"
+                stroke="#d97706"
+                strokeWidth="1.5"
+              />
+            )}
+          </>
+        ) : (
+          <>
+            {/* PLANO: arco MEDIAL (lado izquierdo en orientación estándar) */}
+            <path
+              d="M26 158 C22 135 22 108 24 82 C24 70 25 60 26 50 C34 56 40 80 40 108 C40 132 36 152 26 158 Z"
+              fill="rgba(99,102,241,0.5)"
+              stroke="rgba(99,102,241,0.85)"
+              strokeWidth="1.4"
+              opacity={archOpacity}
+            />
+            {/* PLANO: cuña retropié medial */}
+            {hasRearfootWedge && (
+              <path
+                d="M50 210 C38 210 26 196 24 168 C30 163 38 172 42 186 C45 196 50 210 50 210 Z"
+                fill="rgba(239,68,68,0.55)"
+                stroke="#dc2626"
+                strokeWidth="1.5"
+              />
+            )}
+            {/* PLANO: barra retrocapital */}
+            {hasMetatarsalPad && (
+              <path
+                d="M27 83 C27 79 73 79 73 83 C73 87 27 87 27 83 Z"
+                fill="rgba(245,158,11,0.8)"
+                stroke="#d97706"
+                strokeWidth="1.5"
+              />
+            )}
+            {/* PLANO: cuña antepié */}
+            {hasForefootWedge && (
+              <path
+                d="M27 68 C24 50 24 30 32 18 C35 28 34 50 32 58 Z"
+                fill="rgba(239,68,68,0.35)"
+                stroke="#ef4444"
+                strokeWidth="1"
+              />
+            )}
+          </>
         )}
 
         {/* Alza de talón */}
@@ -925,7 +1000,7 @@ function InsoleDiagram({ rx, form }) {
 
       {/* Vista superior */}
       <div className="diagram-card" style={{ marginBottom: "1rem" }}>
-        <h4>Vistas Superiores — Molde Técnico (Vista Plantar)</h4>
+        <h4>Vistas Superiores — Molde Técnico (Vista Plantar){rx.tipoPie === "cavo" ? " · Pie Cavo" : ""}</h4>
         <div className="diagrams-dual-row">
           <div className="diagram-side-box">
             <h5>Pie Izquierdo</h5>
@@ -962,7 +1037,7 @@ function InsoleDiagram({ rx, form }) {
 
       {/* Vista lateral */}
       <div className="diagram-card">
-        <h4>Perfiles Laterales Mediales — Cuña y Soporte de Arco</h4>
+        <h4>{rx.tipoPie === "cavo" ? "Perfiles Laterales — Arco Lateral y Cuña" : "Perfiles Laterales Mediales — Cuña y Soporte de Arco"}</h4>
         <div className="diagrams-dual-row">
           <div className="diagram-side-box">
             <h5>Pie Izquierdo</h5>
@@ -987,12 +1062,18 @@ function InsoleDiagram({ rx, form }) {
       <div style={{ display:"flex", gap:"1rem", flexWrap:"wrap", marginTop:"0.75rem", fontSize:"0.78rem", color:"var(--text-muted)" }}>
         <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
           <span style={{ display:"inline-block", width:14, height:10, background:"rgba(99,102,241,0.45)", border:"1px solid rgba(99,102,241,0.8)", borderRadius:2 }}></span>
-          Soporte de arco medial ({rx.arcoSoporte})
+          {rx.tipoPie === "cavo" ? "Soporte de arco lateral" : "Soporte de arco medial"} ({rx.arcoSoporte})
         </span>
         {hasRearfootWedge && (
           <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
             <span style={{ display:"inline-block", width:14, height:10, background:"rgba(239,68,68,0.5)", border:"1px solid #dc2626", borderRadius:2 }}></span>
-            Cuña retropié varo ({cunaRearfootText})
+            {rx.tipoPie === "cavo" ? `Cuña retropié ${cunaRearfootText}` : `Cuña retropié varo (${cunaRearfootText})`}
+          </span>
+        )}
+        {rx.tipoPie === "cavo" && rx.cutOut && (
+          <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
+            <span style={{ display:"inline-block", width:14, height:10, background:"rgba(234,179,8,0.4)", border:"1px solid #ca8a04", borderRadius:2 }}></span>
+            Cut-out bajo 1er radio
           </span>
         )}
         {hasMetatarsalPad && (

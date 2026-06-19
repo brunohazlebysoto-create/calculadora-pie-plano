@@ -53,7 +53,142 @@ function calcBarraRetrocapital(barraRetrocapitalSolicitada, edad, talla, grado) 
   };
 }
 
-export function generatePrescription({ talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor, barraRetrocapital }) {
+// ══════════════════════════════════════════════════════════════════
+// MÓDULO B — PIE CAVO
+// ══════════════════════════════════════════════════════════════════
+
+function calcCavo(grado, edad, talla, testColeman) {
+  // Filtro 0: Alerta Neurológica
+  if (edad < 4) {
+    return {
+      tipoPie: "cavo",
+      indicacion: false,
+      alerta: "ALERTA NEUROLÓGICA. Pie cavo en menores de 4 años requiere derivación a Neurología Infantil.",
+      mensaje: "ALERTA NEUROLÓGICA. Pie cavo en menores de 4 años requiere derivación a Neurología Infantil.",
+    };
+  }
+
+  // Filtro 1: Tipo de cuña según Test de Coleman
+  const tipoCuna = testColeman === "positivo" ? "EXTERNA" : "INTERNA";
+
+  let arcoMm, barraMm, cutOut, material, cunaFlexibleMm, cunaRigidoMm;
+
+  // Filtro 2: Talla ≥ 41
+  if (talla >= 41) {
+    if (grado === GRADES.LEVE) {
+      arcoMm = 18; barraMm = 4; cutOut = false;
+      material = "Resina flexible + Poron 3mm";
+      cunaFlexibleMm = 3; cunaRigidoMm = 0;
+    } else if (grado === GRADES.MODERADO) {
+      arcoMm = 22; barraMm = 5; cutOut = true;
+      material = "Resina flexible + Poron";
+      cunaFlexibleMm = 4; cunaRigidoMm = 2;
+    } else {
+      arcoMm = 26; barraMm = 5; cutOut = true;
+      material = "EVA Shore 35 + Resina resiliencia";
+      cunaFlexibleMm = 5; cunaRigidoMm = 3;
+    }
+  } else {
+    // Filtro 3: Talla < 41, por edad
+    if (edad >= 4 && edad <= 7) {
+      barraMm = 0;
+      if (grado === GRADES.LEVE) {
+        arcoMm = 15; cutOut = false;
+        material = "EVA Shore 35";
+        cunaFlexibleMm = 2; cunaRigidoMm = 0;
+      } else if (grado === GRADES.MODERADO) {
+        arcoMm = 18; cutOut = false;
+        material = "EVA Shore 35";
+        cunaFlexibleMm = 3; cunaRigidoMm = 0;
+      } else {
+        arcoMm = 20; cutOut = true;
+        material = "EVA Shore 35";
+        cunaFlexibleMm = 4; cunaRigidoMm = 2;
+      }
+    } else if (edad >= 8 && edad <= 11) {
+      if (grado === GRADES.LEVE) {
+        arcoMm = 18; barraMm = 3; cutOut = false;
+        material = "EVA Doble Densidad (45/30)";
+        cunaFlexibleMm = 3; cunaRigidoMm = 0;
+      } else if (grado === GRADES.MODERADO) {
+        arcoMm = 20; barraMm = 4; cutOut = true;
+        material = "EVA Doble Densidad (45/30)";
+        cunaFlexibleMm = 4; cunaRigidoMm = 2;
+      } else {
+        arcoMm = 24; barraMm = 4; cutOut = true;
+        material = "EVA Doble Densidad (45/30)";
+        cunaFlexibleMm = 5; cunaRigidoMm = 3;
+      }
+    } else {
+      // edad >= 12
+      if (grado === GRADES.LEVE) {
+        arcoMm = 18; barraMm = 3; cutOut = false;
+        material = "Resina flexible + Poron 3mm";
+        cunaFlexibleMm = 3; cunaRigidoMm = 0;
+      } else if (grado === GRADES.MODERADO) {
+        arcoMm = 22; barraMm = 4; cutOut = true;
+        material = "Resina flexible + Poron 3mm";
+        cunaFlexibleMm = 4; cunaRigidoMm = 2;
+      } else {
+        arcoMm = 26; barraMm = 5; cutOut = true;
+        material = "Resina flexible + Poron 3mm";
+        cunaFlexibleMm = 5; cunaRigidoMm = 3;
+      }
+    }
+  }
+
+  // Determinar cuña según flexibilidad (Coleman)
+  let cunaRearfootStr;
+  if (tipoCuna === "EXTERNA") {
+    cunaRearfootStr = cunaFlexibleMm > 0 ? `${cunaFlexibleMm} mm Ext` : "0";
+  } else {
+    cunaRearfootStr = cunaRigidoMm > 0 ? `${cunaRigidoMm} mm Int` : "0";
+  }
+
+  const gradoLabel = { leve: "Leve", moderado: "Moderado", severo: "Severo" }[grado];
+  const colemanLabel = testColeman === "positivo" ? "Flexible (Coleman +)" : "Rígido (Coleman −)";
+
+  return {
+    tipoPie: "cavo",
+    indicacion: true,
+    tipo: `Plantilla para Pie Cavo ${gradoLabel} — ${colemanLabel}`,
+    indicacion_desc: `Pie cavo ${gradoLabel.toLowerCase()} ${colemanLabel.toLowerCase()}`,
+    arcoSoporte: `${arcoMm}mm`,
+    cunaRearfoot: cunaRearfootStr,
+    cunaForefoot: "N/A",
+    flancoMedial: "N/A",
+    barraRetrocapitalMm: barraMm,
+    cutOut,
+    material,
+    alerta: null,
+    longitud: "Longitud completa",
+    controles: "Control a los 3 meses",
+    notas: [
+      `Arco lateral (soporte del arco cavo): ${arcoMm} mm.`,
+      `Cuña de retropié: ${cunaRearfootStr} (${colemanLabel}).`,
+      cutOut ? "Cut-out bajo 1er radio: descarga del primer metatarsiano." : "Sin cut-out.",
+      barraMm > 0 ? `Barra retrocapital: ${barraMm} mm.` : "Sin barra retrocapital.",
+    ],
+    fundamentacion: [
+      "Pie cavo: el soporte se aplica en el arco lateral (no medial).",
+      "Test de Coleman: cuña externa en pie flexible, interna en pie rígido.",
+      "Cut-out bajo 1er radio indicado en grado moderado y severo para descargar el primer metatarsiano.",
+    ],
+    alzaTalon: null,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// API PÚBLICA
+// ══════════════════════════════════════════════════════════════════
+
+export function generatePrescription({ tipoPie = "plano", talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor, barraRetrocapital, testColeman }) {
+  // Routing por tipo de pie
+  if (tipoPie === "cavo") {
+    return calcCavo(grado, edad, talla, testColeman);
+  }
+
+  // ── PIE PLANO (lógica original intacta) ──
   if (edad < 2) {
     return { error: "Edad mínima para prescripción: 2 años." };
   }
@@ -92,6 +227,7 @@ function buildRx({ talla, edad, grado, sintomas, flexible, dismetriaActiva, dism
   const barra = calcBarraRetrocapital(barraRetrocapital, edad, talla, grado);
 
   const rx = {
+    tipoPie: "plano",
     indicacion: true,
     tipo: "",
     arcoSoporte: "",
