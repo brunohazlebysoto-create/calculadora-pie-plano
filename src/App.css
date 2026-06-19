@@ -965,13 +965,14 @@ footer br {
 /* ── ESTILOS DE IMPRESIÓN ── */
 @media print {
   @page {
-    size: A4;
-    margin: 1.5cm;
+    size: auto;
+    margin: 0.8cm 1cm;
   }
 
   body {
     background-color: white !important;
     color: black !important;
+    font-size: 11px !important;
   }
 
   /* Ocultar elementos de pantalla, historial, guías, además de Notas, Evidencia y campos solicitados */
@@ -997,34 +998,35 @@ footer br {
   }
 
   .rx-header {
-    padding-bottom: 0.4rem !important;
-    margin-bottom: 0.5rem !important;
+    padding-bottom: 0.25rem !important;
+    margin-bottom: 0.35rem !important;
   }
 
   .rx-header h2 {
-    font-size: 1.2rem !important;
+    font-size: 1.05rem !important;
     color: black !important;
     border-bottom: 2px solid black !important;
-    padding-bottom: 0.3rem !important;
-    margin-bottom: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
+    margin-bottom: 0.15rem !important;
   }
 
   .rx-meta {
-    gap: 0.25rem !important;
-    margin-top: 0.2rem !important;
+    gap: 0.2rem !important;
+    margin-top: 0.15rem !important;
   }
 
   .rx-meta span {
     border: 1px solid #ccc !important;
     color: black !important;
     background: transparent !important;
-    padding: 0.15rem 0.5rem !important;
-    font-size: 0.72rem !important;
+    padding: 0.1rem 0.4rem !important;
+    font-size: 0.65rem !important;
   }
 
   .rx-grid {
-    gap: 0.4rem !important;
-    margin-bottom: 0.5rem !important;
+    gap: 0.3rem !important;
+    margin-bottom: 0.35rem !important;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
   }
 
   .rx-item {
@@ -1032,58 +1034,64 @@ footer br {
     border: 1px solid #ccc !important;
     border-left: 3px solid black !important;
     page-break-inside: avoid;
-    padding: 0.35rem 0.6rem !important;
+    padding: 0.25rem 0.5rem !important;
   }
 
   .rx-label {
-    font-size: 0.65rem !important;
+    font-size: 0.6rem !important;
   }
 
   .rx-value {
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Diagnóstico/indicación si hay una sección extra */
+  .rx-indicacion {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.3rem !important;
   }
 
   .insole-diagrams {
-    page-break-inside: avoid;
-    border-top: 2px solid #ccc !important;
-    margin-top: 0.5rem !important;
-    padding-top: 0.5rem !important;
+    /* Sin page-break-inside: avoid — dejamos que fluya junto a la receta */
+    border-top: 1.5px solid #bbb !important;
+    margin-top: 0.35rem !important;
+    padding-top: 0.35rem !important;
   }
 
   .insole-diagrams h3 {
-    font-size: 0.8rem !important;
-    margin-bottom: 0.3rem !important;
+    font-size: 0.72rem !important;
+    margin-bottom: 0.25rem !important;
   }
 
   .diagram-card {
     background: transparent !important;
     border: 1px solid #ccc !important;
-    padding: 0.4rem !important;
-    margin-bottom: 0.4rem !important;
+    padding: 0.3rem !important;
+    margin-bottom: 0.3rem !important;
   }
 
   .diagram-card h4 {
-    font-size: 0.72rem !important;
-    margin-bottom: 0.3rem !important;
+    font-size: 0.65rem !important;
+    margin-bottom: 0.2rem !important;
   }
 
   .diagram-side-box {
     background: transparent !important;
     border: 1px solid #ccc !important;
-    padding: 0.3rem !important;
+    padding: 0.25rem !important;
   }
 
   .diagram-side-box h5 {
-    font-size: 0.7rem !important;
-    margin-bottom: 0.2rem !important;
+    font-size: 0.62rem !important;
+    margin-bottom: 0.15rem !important;
   }
 
   .insole-svg {
-    max-height: 130px !important;
+    max-height: 115px !important;
   }
 
   .insole-svg-wide {
-    max-height: 85px !important;
+    max-height: 78px !important;
   }
 
   /* Firma y Sello en HTML */
@@ -1093,9 +1101,9 @@ footer br {
 
   .signature-block {
     display: block !important;
-    margin-top: 0.8rem !important;
+    margin-top: 0.6rem !important;
     text-align: right;
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
     page-break-inside: avoid;
   }
 
