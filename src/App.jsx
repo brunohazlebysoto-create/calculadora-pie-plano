@@ -736,9 +736,9 @@ function InsoleDiagram({ rx, form }) {
         {/* Eje central */}
         <line x1="50" y1="12" x2="50" y2="208" stroke="var(--text-muted)" strokeWidth="0.4" strokeDasharray="4,3" opacity="0.2"/>
 
-        {/* Zona de soporte de arco medial (más amplia y visible) */}
+        {/* Zona de soporte de arco medial — borde medial interno, bien dentro del contorno */}
         <path
-          d="M24 155 C17 128 18 98 22 72 C22 62 23 52 24 44 C33 52 38 78 38 105 C38 128 33 148 24 155 Z"
+          d="M26 158 C22 135 22 108 24 82 C24 70 25 60 26 50 C34 56 40 80 40 108 C40 132 36 152 26 158 Z"
           fill="rgba(99,102,241,0.5)"
           stroke="rgba(99,102,241,0.85)"
           strokeWidth="1.4"
@@ -887,17 +887,17 @@ function InsoleDiagram({ rx, form }) {
           </>
         )}
 
-        {/* Cota de la cuña (vertical a la derecha del talón) */}
+        {/* Cota de la cuña — texto dentro del triángulo, cota en borde interior */}
         {wedgeHpx > 0 && (
           <>
-            <line x1={hX+9} y1={wedgeTopY} x2={hX+9} y2={iTopY}
+            <line x1={hX-4} y1={wedgeTopY} x2={hX-4} y2={iTopY}
               stroke="#dc2626" strokeWidth="0.8" strokeDasharray="2,2"/>
-            <line x1={hX+5} y1={wedgeTopY} x2={hX+13} y2={wedgeTopY}
+            <line x1={hX-9} y1={wedgeTopY} x2={hX+1} y2={wedgeTopY}
               stroke="#dc2626" strokeWidth="1.5"/>
-            <line x1={hX+5} y1={iTopY} x2={hX+13} y2={iTopY}
+            <line x1={hX-9} y1={iTopY} x2={hX+1} y2={iTopY}
               stroke="#dc2626" strokeWidth="1.5"/>
-            <text x={hX+17} y={(wedgeTopY+iTopY)/2+3}
-              textAnchor="start" fontSize="7.5" fill="#dc2626" fontWeight="bold">Cuña {cunaRearfootText}</text>
+            <text x={(wSX+hX)/2} y={(wedgeTopY+iTopY)/2+3}
+              textAnchor="middle" fontSize="7" fill="#dc2626" fontWeight="bold">Cuña {cunaRearfootText}</text>
           </>
         )}
 
@@ -933,9 +933,9 @@ function InsoleDiagram({ rx, form }) {
               {renderInsoleTop(true)}
               <text x="50" y="218" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
               <text x="50" y="9" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
-              <text x="74" y="108" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold" transform="rotate(90,74,108)">{archText}</text>
-              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ B.R. {rx.barraRetrocapitalMm}mm</text>}
-              {hasRearfootWedge && <text x="83" y="198" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="end">Cuña {cunaRearfootText}</text>}
+              <text x="50" y="117" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold">{archText}</text>
+              {hasMetatarsalPad && <text x="50" y="88" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ B.R. {rx.barraRetrocapitalMm}mm</text>}
+              {hasRearfootWedge && <text x="50" y="202" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="middle">Cuña {cunaRearfootText}</text>}
               {rx.alzaTalon && rx.alzaTalon.pie === "izquierdo" && (
                 <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
               )}
@@ -948,9 +948,9 @@ function InsoleDiagram({ rx, form }) {
               {renderInsoleTop(false)}
               <text x="50" y="218" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">TALÓN</text>
               <text x="50" y="9" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="var(--text-main)">PUNTA</text>
-              <text x="26" y="108" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold" transform="rotate(-90,26,108)">{archText}</text>
-              {hasMetatarsalPad && <text x="50" y="91" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ B.R. {rx.barraRetrocapitalMm}mm</text>}
-              {hasRearfootWedge && <text x="17" y="198" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="start">Cuña {cunaRearfootText}</text>}
+              <text x="50" y="117" textAnchor="middle" fontSize="5.5" fill="rgba(99,102,241,1)" fontWeight="bold">{archText}</text>
+              {hasMetatarsalPad && <text x="50" y="88" fontSize="5.5" fill="#d97706" fontWeight="bold" textAnchor="middle">▬ B.R. {rx.barraRetrocapitalMm}mm</text>}
+              {hasRearfootWedge && <text x="50" y="202" fontSize="5.5" fill="#dc2626" fontWeight="bold" textAnchor="middle">Cuña {cunaRearfootText}</text>}
               {rx.alzaTalon && rx.alzaTalon.pie === "derecho" && (
                 <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
               )}
