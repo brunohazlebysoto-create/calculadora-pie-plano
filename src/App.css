@@ -996,24 +996,51 @@ footer br {
     width: 100% !important;
   }
 
+  .rx-header {
+    padding-bottom: 0.4rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
   .rx-header h2 {
-    font-size: 1.8rem !important;
+    font-size: 1.2rem !important;
     color: black !important;
     border-bottom: 2px solid black !important;
-    padding-bottom: 0.5rem !important;
+    padding-bottom: 0.3rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .rx-meta {
+    gap: 0.25rem !important;
+    margin-top: 0.2rem !important;
   }
 
   .rx-meta span {
     border: 1px solid #ccc !important;
     color: black !important;
     background: transparent !important;
+    padding: 0.15rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .rx-grid {
+    gap: 0.4rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .rx-item {
     background: transparent !important;
     border: 1px solid #ccc !important;
-    border-left: 4px solid black !important;
+    border-left: 3px solid black !important;
     page-break-inside: avoid;
+    padding: 0.35rem 0.6rem !important;
+  }
+
+  .rx-label {
+    font-size: 0.65rem !important;
+  }
+
+  .rx-value {
+    font-size: 0.8rem !important;
   }
 
   .insole-diagrams {
@@ -1052,11 +1079,11 @@ footer br {
   }
 
   .insole-svg {
-    max-height: 155px !important;
+    max-height: 130px !important;
   }
 
   .insole-svg-wide {
-    max-height: 100px !important;
+    max-height: 85px !important;
   }
 
   /* Firma y Sello en HTML */
@@ -1066,9 +1093,9 @@ footer br {
 
   .signature-block {
     display: block !important;
-    margin-top: 2.5rem;
+    margin-top: 0.8rem !important;
     text-align: right;
-    font-size: 0.95rem;
+    font-size: 0.8rem !important;
     page-break-inside: avoid;
   }
 
