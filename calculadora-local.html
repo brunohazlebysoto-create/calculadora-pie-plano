@@ -1,0 +1,2009 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Calculadora clínica basada en evidencia para la prescripción de plantillas ortopédicas y el análisis de pie plano (flexible y rígido)." />
+    <title>Calculadora de Plantillas Ortopédicas | Pie Plano</title>
+    <!-- React, ReactDOM, Babel, and Google Fonts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js" crossorigin></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      /* ── VARIABLES GLOBALES ── */
+      :root {
+        --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+        --font-heading: 'Outfit', system-ui, sans-serif;
+        --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+        --bg-body: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-header: #0f172a;
+        --bg-nav-active: #f8fafc;
+        
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --text-on-header: #f8fafc;
+        --text-header-muted: #94a3b8;
+        
+        --accent: #4f46e5;
+        --accent-hover: #4338ca;
+        
+        --border-color: #e2e8f0;
+        --border-focus: #6366f1;
+        
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+        
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+
+        --color-success: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        
+        --bg-badge-leve: #dcfce7;
+        --text-badge-leve: #15803d;
+        --bg-badge-moderado: #fef3c7;
+        --text-badge-moderado: #b45309;
+        --bg-badge-severo: #ffe4e6;
+        --text-badge-severo: #be123c;
+        
+        --bg-note: #fffbeb;
+        --border-note: #fef08a;
+        --text-note: #78350f;
+        --text-note-darker: #713f12;
+
+        --bg-item-rx: #f8fafc;
+        --border-item-rx: #e2e8f0;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-body: #090d16;
+          --bg-card: #131b2e;
+          --bg-header: #070a12;
+          --bg-nav-active: #090d16;
+          
+          --text-primary: #f8fafc;
+          --text-secondary: #94a3b8;
+          --text-muted: #64748b;
+          --text-on-header: #f8fafc;
+          --text-header-muted: #64748b;
+          
+          --accent: #6366f1;
+          --accent-hover: #818cf8;
+          
+          --border-color: #1e293b;
+          --border-focus: #818cf8;
+          
+          --glass-bg: rgba(19, 27, 46, 0.7);
+          --glass-border: rgba(255, 255, 255, 0.05);
+          --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+          
+          --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+          --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+          --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+
+          --bg-badge-leve: rgba(16, 185, 129, 0.15);
+          --text-badge-leve: #34d399;
+          --bg-badge-moderado: rgba(245, 158, 11, 0.15);
+          --text-badge-moderado: #fbbf24;
+          --bg-badge-severo: rgba(239, 68, 68, 0.15);
+          --text-badge-severo: #f87171;
+          
+          --bg-note: rgba(251, 191, 36, 0.08);
+          --border-note: rgba(251, 191, 36, 0.2);
+          --text-note: #fcd34d;
+          --text-note-darker: #f59e0b;
+
+          --bg-item-rx: #1a243d;
+          --border-item-rx: #1e293b;
+        }
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: var(--font-sans);
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      #root { min-height: 100vh; display: flex; flex-direction: column; }
+
+      .app { display: flex; flex-direction: column; background-color: var(--bg-body); min-height: 100vh; }
+
+      /* Header */
+      header {
+        background: radial-gradient(circle at top right, #1e1b4b, var(--bg-header));
+        color: var(--text-on-header);
+        padding: 2.5rem 2rem 0;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+      }
+      header h1 {
+        font-family: var(--font-heading);
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        background: linear-gradient(135deg, #a5b4fc, #e0e7ff, #ffffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+      }
+      .subtitle {
+        font-size: 1rem;
+        color: var(--text-header-muted);
+        max-width: 600px;
+        margin: 0 auto 1.5rem;
+      }
+      nav { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+      nav button {
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        border: none;
+        color: var(--text-header-muted);
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 12px 12px 0 0;
+        transition: all 0.2s ease;
+        position: relative;
+      }
+      nav button:hover { color: var(--text-on-header); background-color: rgba(255, 255, 255, 0.05); }
+      nav button.active { background-color: var(--bg-body); color: var(--accent); font-weight: 600; }
+      nav button.active::after {
+        content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+        background-color: var(--accent); border-radius: 3px 3px 0 0;
+      }
+
+      /* Main Grid */
+      .main-grid {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 2rem;
+        padding: 2.5rem 2rem;
+        max-width: 1300px;
+        margin: 0 auto;
+        width: 100%;
+        align-items: start;
+      }
+      @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; padding: 1.5rem 1rem; } }
+
+      /* Cards */
+      .form-section, .result-section, .registro-card, .padres-card, .guia-section details {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+      }
+      @supports (backdrop-filter: blur(10px)) {
+        .form-section, .result-section, .registro-card, .padres-card {
+          background-color: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          backdrop-filter: blur(12px);
+          box-shadow: var(--glass-shadow);
+        }
+      }
+      .form-section:hover, .result-section:hover, .registro-card:hover { box-shadow: var(--shadow-lg); }
+
+      .form-section h2, .result-section h2, .registro-section h2, .guia-section h2, .padres-section h2 {
+        font-family: var(--font-heading);
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.02em;
+      }
+
+      /* Form */
+      form label { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); }
+      form input, form select {
+        padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 10px;
+        font-family: var(--font-sans); font-size: 0.95rem; color: var(--text-primary);
+        background-color: var(--bg-body); transition: all 0.2s ease;
+      }
+      form input:focus, form select:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); background-color: var(--bg-card); }
+      fieldset { border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; background-color: rgba(0, 0, 0, 0.02); }
+      legend { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); padding: 0 0.5rem; }
+      .checkbox-label { flex-direction: row !important; align-items: center; gap: 0.75rem !important; font-weight: 400 !important; margin-bottom: 0.75rem !important; cursor: pointer; color: var(--text-secondary); }
+      .checkbox-label input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--accent); cursor: pointer; }
+
+      .btn-primary {
+        width: 100%; padding: 0.85rem; background-color: var(--accent); color: white; border: none; border-radius: 12px;
+        font-family: var(--font-sans); font-size: 1rem; font-weight: 600; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); transition: all 0.2s ease;
+      }
+      .btn-primary:hover { background-color: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3); }
+
+      .error {
+        color: var(--color-error); font-size: 0.9rem; background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-weight: 500; animation: shake 0.4s ease;
+      }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+
+      /* Results */
+      .result-section { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+      
+      .no-indicacion { border-left: 4px solid var(--color-success); padding-left: 1.5rem; }
+      .no-indicacion h2 { color: var(--color-success); font-size: 1.25rem; margin-bottom: 0.75rem; }
+      .no-indicacion .mensaje { color: var(--text-primary); margin-bottom: 1.25rem; }
+      .no-indicacion ul { padding-left: 1.5rem; color: var(--text-secondary); }
+      .no-indicacion li { margin-bottom: 0.5rem; }
+
+      .rx-header { border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
+      .rx-header h2 { font-size: 1.5rem; color: var(--accent); margin-bottom: 0.5rem; }
+      .rx-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; align-items: center; }
+      .rx-meta span:not(.badge) { background-color: var(--bg-body); color: var(--text-secondary); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 500; border: 1px solid var(--border-color); }
+
+      .badge { padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-block; text-transform: capitalize; }
+      .badge-leve { background-color: var(--bg-badge-leve); color: var(--text-badge-leve); }
+      .badge-moderado { background-color: var(--bg-badge-moderado); color: var(--text-badge-moderado); }
+      .badge-severo { background-color: var(--bg-badge-severo); color: var(--text-badge-severo); }
+
+      .rx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+      .rx-item { display: flex; flex-direction: column; justify-content: space-between; padding: 0.85rem 1rem; background-color: var(--bg-item-rx); border-radius: 12px; border: 1px solid var(--border-item-rx); border-left: 4px solid var(--border-color); }
+      .rx-highlight { background-color: rgba(99, 102, 241, 0.05); border-left-color: var(--accent); }
+      .rx-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+      .rx-value { font-size: 0.95rem; color: var(--text-primary); font-weight: 700; }
+
+      .notas { background-color: var(--bg-note); border: 1px solid var(--border-note); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+      .notas h3 { font-size: 0.95rem; color: var(--text-note-darker); margin-bottom: 0.5rem; }
+      .notas ul { padding-left: 1.25rem; }
+      .notas li { font-size: 0.9rem; color: var(--text-note); margin-bottom: 0.5rem; }
+
+      details.fundamentacion { margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; background-color: var(--bg-card); }
+      details.fundamentacion summary { padding: 0.85rem 1.25rem; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); background-color: var(--bg-body); }
+      details.fundamentacion ul { padding: 1rem 1.5rem; list-style: square; color: var(--text-secondary); }
+      details.fundamentacion li { font-size: 0.85rem; margin-bottom: 0.5rem; }
+
+      .rx-actions { display: flex; align-items: center; gap: 1.25rem; border-top: 1px solid var(--border-color); padding-top: 1.25rem; }
+      .btn-save { padding: 0.75rem 1.75rem; background-color: #10b981; color: white; border: none; border-radius: 10px; font-family: var(--font-sans); font-size: 0.95rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+      .btn-save:hover { background-color: #059669; transform: translateY(-1px); }
+      .saved-msg { font-size: 0.9rem; color: #10b981; font-weight: 600; }
+
+      /* Registry */
+      .registro-section { max-width: 900px; margin: 2rem auto; padding: 0 2rem; width: 100%; }
+      .registro-list { display: flex; flex-direction: column; gap: 1rem; }
+      .registro-card { border-left: 5px solid var(--accent); animation: fadeIn 0.3s ease; }
+      .reg-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+      .reg-paciente { font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; color: var(--text-primary); }
+      .reg-fecha { font-size: 0.85rem; color: var(--text-muted); margin-left: auto; }
+      .btn-delete { background: none; border: none; color: var(--color-error); cursor: pointer; font-size: 1.1rem; padding: 0.25rem; line-height: 1; border-radius: 6px; }
+      .btn-delete:hover { background-color: rgba(239, 68, 68, 0.1); transform: scale(1.1); }
+      .reg-details { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--text-secondary); }
+      .reg-details span { background-color: var(--bg-body); padding: 0.2rem 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); }
+      .reg-tipo { font-size: 1rem; font-weight: 700; color: var(--accent); margin-bottom: 0.75rem; }
+      details.reg-full { border-top: 1px solid var(--border-color); padding-top: 0.75rem; margin-top: 0.5rem; }
+      details.reg-full summary { cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+      .rx-grid.compact { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-top: 0.75rem; }
+      .nota-small { font-size: 0.85rem; color: var(--text-note); background-color: var(--bg-note); border: 1px solid var(--border-note); padding: 0.6rem 0.85rem; border-radius: 8px; }
+
+      /* Clinical Guide */
+      .guia-section { max-width: 900px; margin: 2rem auto; padding: 0 2rem; width: 100%; }
+      .guia-section details { margin-bottom: 1rem; padding: 0; overflow: hidden; }
+      .guia-section details summary { padding: 1.25rem 1.5rem; font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; color: var(--text-primary); cursor: pointer; background-color: var(--bg-card); }
+      .guia-section details[open] summary { background-color: rgba(99, 102, 241, 0.05); color: var(--accent); border-bottom: 1px solid var(--border-color); }
+      
+      .table-wrapper { overflow-x: auto; width: 100%; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left; }
+      th { background-color: var(--bg-body); padding: 1rem 1.25rem; font-weight: 700; color: var(--text-primary); border-bottom: 2px solid var(--border-color); text-transform: uppercase; font-size: 0.75rem; }
+      td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+      tr:last-child td { border-bottom: none; }
+      
+      .guia-tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; padding: 1.5rem; }
+      .test-card { background-color: var(--bg-body); border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border-color); border-left: 4px solid var(--accent); }
+      .test-card h4 { font-family: var(--font-heading); font-size: 1rem; color: var(--accent); margin-bottom: 0.5rem; font-weight: 700; }
+      .test-card p { font-size: 0.85rem; color: var(--text-secondary); }
+
+      /* Parents Section */
+      .padres-section { max-width: 1000px; margin: 2rem auto; padding: 0 2rem; width: 100%; }
+      .padres-intro { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 2rem; }
+      .padres-card h3 { font-family: var(--font-heading); font-size: 1.2rem; color: var(--accent); margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
+      .diagrams-row { display: flex; gap: 1.5rem; justify-content: space-around; flex-wrap: wrap; }
+      .diagram-box { flex: 1; min-width: 200px; max-width: 280px; background-color: var(--bg-body); border-radius: 12px; padding: 1rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+      
+      svg text { fill: var(--text-primary) !important; font-family: var(--font-sans); }
+      svg text[fill="#2b6cb0"] { fill: #818cf8 !important; }
+      svg text[fill="#c05621"] { fill: #f59e0b !important; }
+      svg text[fill="#276749"] { fill: #34d399 !important; }
+      svg text[fill="#718096"] { fill: var(--text-muted) !important; }
+      svg text[fill="#4a5568"] { fill: var(--text-secondary) !important; }
+      svg path[stroke="#2b6cb0"] { stroke: #818cf8 !important; }
+      svg path[stroke="#c05621"] { stroke: #f59e0b !important; }
+      svg path[stroke="#c07040"] { stroke: var(--border-color) !important; }
+      svg path[fill="#fde8d0"] { fill: #e2e8f0 !important; }
+      
+      @media (prefers-color-scheme: dark) {
+        svg path[fill="#fde8d0"] { fill: #334155 !important; }
+        svg rect[fill="#c07040"] { fill: #475569 !important; }
+        svg rect[fill="#fde8d0"] { fill: #1e293b !important; }
+        svg path[fill="#fde8d0"] { fill: #1e293b !important; }
+        svg path[fill="#bee3f8"] { fill: rgba(99, 102, 241, 0.2) !important; }
+        svg path[fill="#c6f6d5"] { fill: rgba(16, 185, 129, 0.1) !important; }
+      }
+
+      .mejoria-wrap { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; align-items: start; }
+      @media (max-width: 768px) { .mejoria-wrap { grid-template-columns: 1fr; } }
+      .mejoria-lista { display: flex; flex-direction: column; gap: 0.75rem; }
+      .mejoria-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.85rem 1rem; border-radius: 12px; font-size: 0.9rem; border-left: 4px solid var(--border-color); }
+      .mejoria-item.green { background-color: var(--bg-badge-leve); border-left-color: var(--text-badge-leve); color: var(--text-badge-leve); }
+      .mejoria-item.orange { background-color: var(--bg-badge-moderado); border-left-color: var(--text-badge-moderado); color: var(--text-badge-moderado); }
+      .mejoria-item.blue { background-color: rgba(99, 102, 241, 0.1); border-left-color: var(--accent); color: var(--accent); }
+      .mi-icon { font-weight: 700; font-size: 1.1rem; width: 20px; flex-shrink: 0; }
+
+      .semaforo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+      @media (max-width: 768px) { .semaforo-grid { grid-template-columns: 1fr; } }
+      .semaforo-card { border-radius: 14px; padding: 1.5rem; border: 1px solid var(--border-color); border-top: 5px solid transparent; box-shadow: var(--shadow-sm); }
+      .semaforo-card.verde { background-color: var(--bg-badge-leve); border-top-color: var(--text-badge-leve); }
+      .semaforo-card.amarillo { background-color: var(--bg-badge-moderado); border-top-color: var(--text-badge-moderado); }
+      .semaforo-card.rojo { background-color: var(--bg-badge-severo); border-top-color: var(--text-badge-severo); }
+      
+      .semaforo-dot { width: 16px; height: 16px; border-radius: 50%; margin-bottom: 0.75rem; }
+      .verde-dot { background-color: var(--text-badge-leve); }
+      .amarillo-dot { background-color: var(--text-badge-moderado); }
+      .rojo-dot { background-color: var(--text-badge-severo); }
+      .semaforo-card h4 { font-family: var(--font-heading); font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-primary); font-weight: 700; }
+      .semaforo-card ul { padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-secondary); }
+      .semaforo-card li { margin-bottom: 0.5rem; }
+      
+      .plantilla-note { margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary); background-color: var(--bg-body); padding: 1rem 1.25rem; border-radius: 12px; border-left: 4px solid var(--accent); }
+
+      /* Footer */
+      footer { margin-top: auto; background-color: var(--bg-header); color: var(--text-header-muted); text-align: center; padding: 2rem; font-size: 0.8rem; border-top: 1px solid var(--border-color); }
+
+      /* ── DIAGRAMAS DE PLANTILLA ── */
+      .insole-diagrams {
+        margin-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        padding-top: 1.5rem;
+      }
+      .insole-diagrams h3 {
+        font-family: var(--font-heading);
+        font-size: 1rem;
+        color: var(--accent);
+        margin-bottom: 1rem;
+        font-weight: 700;
+      }
+      .diagrams-dual-row {
+        display: flex;
+        gap: 1rem;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+      }
+      .diagram-side-box {
+        flex: 1;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 0;
+      }
+      .diagram-side-box h5 {
+        font-family: var(--font-heading);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        text-align: center;
+      }
+      .diagram-card {
+        background-color: var(--bg-body);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      .diagram-card h4 {
+        font-family: var(--font-heading);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+      }
+      .insole-svg {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+      }
+      .insole-svg-wide {
+        width: 100%;
+        height: auto;
+        max-height: 110px;
+      }
+
+      /* Elementos exclusivos de impresión (ocultos en pantalla) */
+      .print-page-2, .print-only {
+        display: none;
+      }
+
+      .btn-print {
+        padding: 0.75rem 1.5rem;
+        background-color: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+        transition: all 0.2s ease;
+      }
+      .btn-print:hover {
+        background-color: var(--accent-hover);
+        transform: translateY(-1px);
+      }
+
+      /* ── ESTILOS DE IMPRESIÓN ── */
+      @media print {
+        @page {
+          size: A4;
+          margin: 1.5cm;
+        }
+        body {
+          background-color: white !important;
+          color: black !important;
+        }
+
+        /* Ocultar elementos de pantalla, historial, guías, además de Notas, Evidencia y campos indicados */
+        header, nav, .form-section, footer, .rx-actions, .registro-section, .guia-section, .padres-section, .notas, details.fundamentacion, .print-hide {
+          display: none !important;
+        }
+
+        .main-grid {
+          display: block !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        .result-section {
+          box-shadow: none !important;
+          border: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          background: transparent !important;
+          width: 100% !important;
+        }
+        .rx-header h2 {
+          font-size: 1.8rem !important;
+          color: black !important;
+          border-bottom: 2px solid black !important;
+          padding-bottom: 0.5rem !important;
+        }
+        .rx-meta span {
+          border: 1px solid #ccc !important;
+          color: black !important;
+          background: transparent !important;
+        }
+        .rx-item {
+          background: transparent !important;
+          border: 1px solid #ccc !important;
+          border-left: 4px solid black !important;
+          page-break-inside: avoid;
+        }
+        .insole-diagrams {
+          page-break-inside: avoid;
+          border-top: 2px solid #ccc !important;
+          margin-top: 1rem !important;
+          padding-top: 1rem !important;
+        }
+        .diagram-card {
+          background: transparent !important;
+          border: 1px solid #ccc !important;
+        }
+        .diagram-side-box {
+          background: transparent !important;
+          border: 1px solid #ccc !important;
+        }
+        .print-only {
+          display: block !important;
+        }
+        .signature-block {
+          display: block !important;
+          margin-top: 2.5rem;
+          text-align: right;
+          font-size: 0.95rem;
+          page-break-inside: avoid;
+        }
+        /* Página 2: Guía de Padres */
+        .print-page-2 {
+          display: block !important;
+          page-break-before: always;
+          padding-top: 1cm;
+        }
+        .print-header {
+          border-bottom: 2px solid black;
+          padding-bottom: 0.5rem;
+          margin-bottom: 1.5rem;
+        }
+        .print-header h2 {
+          font-size: 1.5rem !important;
+          color: black !important;
+          margin: 0;
+        }
+        .print-header p {
+          font-size: 0.85rem;
+          color: #444;
+          margin: 0.25rem 0 0 0;
+        }
+        .print-card {
+          border: 1px solid #ccc;
+          padding: 1.25rem;
+          margin-top: 1rem;
+          border-radius: 8px;
+          background: transparent !important;
+          page-break-inside: avoid;
+        }
+        .print-card h3 {
+          font-size: 1.1rem !important;
+          color: black !important;
+          margin-bottom: 0.5rem;
+          border-bottom: 1px solid #ccc;
+          padding-bottom: 0.25rem;
+        }
+        .print-card p, .print-card li {
+          font-size: 0.9rem !important;
+          color: black !important;
+          line-height: 1.5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <!-- CODE SCRIPT (Babel on the fly compiling JSX) -->
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      // ── PRESCRIPTION ENGINE LOGIC ──
+      const GRADES = {
+        LEVE: "leve",
+        MODERADO: "moderado",
+        SEVERO: "severo",
+      };
+
+      const AGE_GROUP = {
+        MENOR_4: "menor_4",
+        ESCOLAR_TEMPRANO: "escolar_temprano",
+        ESCOLAR_TARDIO: "escolar_tardio",
+        JUVENIL_ADULTO: "juvenil_adulto",
+      };
+
+      function getAgeGroup(age) {
+        if (age < 2) return null;
+        if (age < 4) return AGE_GROUP.MENOR_4;
+        if (age < 8) return AGE_GROUP.ESCOLAR_TEMPRANO;
+        if (age < 12) return AGE_GROUP.ESCOLAR_TARDIO;
+        return AGE_GROUP.JUVENIL_ADULTO;
+      }
+
+      function generatePrescription({ talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor }) {
+        if (edad < 2) {
+          return { error: "Edad mínima para prescripción: 2 años." };
+        }
+
+        // Under 4 years: no prescription if asymptomatic
+        if (edad < 4 && !sintomas && !dismetriaActiva) {
+          return {
+            indicacion: false,
+            mensaje:
+              "No se indican plantillas en menores de 4 años (pie plano fisiológico en desarrollo).",
+            recomendaciones: [
+              "Estimular marcha descalza en superficies naturales (arena, pasto).",
+              "Evitar calzado con suela rígida o soporte de arco prefabricado.",
+              "Control anual para evaluar el desarrollo del arco plantar.",
+            ],
+          };
+        }
+
+        const rx = buildRx({ talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor });
+        
+        if (!rx.indicacion) {
+          return {
+            indicacion: false,
+            mensaje:
+              "No se indican plantillas en menores de 4 años (pie plano fisiológico en desarrollo).",
+            recomendaciones: [
+              "Estimular marcha descalza en superficies naturales (arena, pasto).",
+              "Evitar calzado con suela rígida o soporte de arco prefabricado.",
+              "Control anual para evaluar el desarrollo del arco plantar.",
+            ],
+          };
+        }
+
+        return rx;
+      }
+
+      function buildRx({ talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor }) {
+        const rx = {
+          indicacion: true,
+          tipo: "",
+          arcoSoporte: "",
+          taconeraAltura: "",
+          cunaRearfoot: "",
+          cunaForefoot: "0 mm",
+          flandeMedal: "",
+          padMetatarsal: false,
+          material: "",
+          longitud: "Longitud completa",
+          notes: [],
+          notas: [],
+          controles: "Control a los 3 meses",
+          fundamentacion: [],
+          alzaTalon: dismetriaActiva ? { pie: dismetriaPie, valor: dismetriaValor } : null,
+        };
+        rx.notes = rx.notas; // alias just in case
+
+        if (dismetriaActiva) {
+          rx.notas.push(`Dismetría de extremidades: Compensar con alza de talón de ${dismetriaValor} mm en la plantilla del pie ${dismetriaPie === "izquierdo" ? "Izquierdo" : "Derecho"}.`);
+        }
+
+        // Rigid non-flexible flat foot -> accommodative only, refer
+        if (!flexible) {
+          rx.tipo = "Plantilla acomodativa (pie plano rígido)";
+          rx.arcoSoporte = "10 mm";
+          rx.taconeraAltura = "25 mm, copa ancha";
+          rx.cunaRearfoot = "0 mm";
+          rx.cunaForefoot = "0 mm";
+          rx.flandeMedal = "Medial y lateral altos para contención y estabilización";
+          rx.material = "EVA blando con cubierta de neopreno";
+          rx.notas.push(
+            "Alerta: El pie plano rígido (no flexible) es una condición estructural fija.",
+            "La plantilla debe ser puramente acomodativa para evitar lesiones en tejidos blandos por presión.",
+            "Se requiere derivación prioritaria a traumatología o podología clínica para descartar coalición tarsal, astrágalo vertical u otras patologías rígidas."
+          );
+          rx.controles = "Control a los 6 meses";
+          rx.fundamentacion.push(
+            "PTTD Stage III / Rigid flatfoot protocol: accommodative orthosis only (Michigan Foot Doctors)",
+            "Delphi Consensus: corrective posting is contraindicated in rigid foot deformities (PMC4282733)"
+          );
+          return rx;
+        }
+
+        // Botón metatarsal: 4 mm retrocapital if symptomatic and age >= 8
+        if (sintomas && edad >= 8) {
+          rx.padMetatarsal = true;
+          rx.notas.push("Botón metatarsal retrocapital de 4 mm indicado para descargar las cabezas metatarsianas.");
+        }
+
+        // Rule 1: Talla >= 41 (independent of age)
+        if (talla >= 41) {
+          rx.tipo = "Plantilla correctora de soporte firme (talla >= 41)";
+          rx.arcoSoporte = "18 mm";
+          rx.cunaRearfoot = "6 mm";
+          rx.taconeraAltura = "18 mm";
+          rx.flandeMedal = "Medial y lateral elevados";
+          rx.material = "Polipropileno con cubierta suave";
+          rx.notas.push(
+            "Paciente con pie sobre talla 41: se prescribe arco medial de 18 mm y cuña de retropié de 6 mm para compensar la mayor longitud del pie.",
+            "Se mantiene la relación biomecánica 1:3 entre cuña y arco medial."
+          );
+          rx.fundamentacion.push(
+            "Escalamiento biomecánico: a mayor longitud del pie (talla >= 41), se requiere mayor flecha de arco (18 mm) y cuña (6 mm) para mantener la misma palanca correctora y dosificación angular.",
+            "Consenso Delphi: el posteo retropié varo y soporte longitudinal controlan el colapso del arco en adultos (PMC4282733)."
+          );
+          return rx;
+        }
+
+        // Rule 2: Age groups (for talla < 41)
+        const ageGroup = getAgeGroup(edad);
+
+        if (ageGroup === AGE_GROUP.MENOR_4) {
+          if (sintomas) {
+            rx.tipo = "Plantilla de confort leve (menor de 4 años)";
+            rx.arcoSoporte = "8 mm";
+            rx.cunaRearfoot = "2 mm";
+            rx.taconeraAltura = "10 mm, copa superficial";
+            rx.flandeMedal = "Mínimo";
+            rx.material = "EVA blando 10 mm (baja densidad, Shore 30)";
+            rx.notas.push(
+              "Menor de 4 años sintomático o padres muy insistentes: se prescribe soporte de confort leve.",
+              "Se utiliza una cuña de retropié mínima (2 mm) y soporte de arco bajo (8 mm) para no interferir con el desarrollo fisiológico natural del pie."
+            );
+            rx.fundamentacion.push(
+              "Revisión Cochrane: desaconseja el uso de plantillas rígidas correctivas en menores de 4 años.",
+              "El uso de ortesis blandas de confort leve está indicado ante sintomatología evidente para reducir la fatiga muscular y tranquilizar a la familia (PMC9561439)."
+            );
+          } else {
+            rx.indicacion = false;
+          }
+          return rx;
+        }
+
+        if (ageGroup === AGE_GROUP.ESCOLAR_TEMPRANO) {
+          rx.tipo = "Plantilla correctora pediátrica (4 a 8 años)";
+          rx.arcoSoporte = "12 mm";
+          rx.cunaRearfoot = "4 mm";
+          rx.taconeraAltura = "12 mm";
+          rx.flandeMedal = "Estándar";
+          rx.material = "EVA 10 mm doble densidad (base firme + cubierta suave)";
+          rx.notas.push(
+            "Notas del Profesor (4-8 años): arco medial de 12 mm y cuña medial de talón (retropié) de 4 mm.",
+            "Relación cuña:arco respetada en proporción 1:3 para estabilizar el retropié."
+          );
+          rx.fundamentacion.push(
+            "Desarrollo dinámico del arco: en el rango de 4 a 8 años, la cuña de 4 mm reduce el valgo del talón y facilita el desarrollo del arco longitudinal medial.",
+            "Estudios clínicos pediátricos demuestran que las plantillas activas mejoran la alineación de la marcha en niños con pie plano sintomático (PMC9561439)."
+          );
+          return rx;
+        }
+
+        if (ageGroup === AGE_GROUP.ESCOLAR_TARDIO) {
+          rx.tipo = "Plantilla correctora pediátrica (8 a 12 años)";
+          rx.arcoSoporte = "15 mm";
+          rx.cunaRearfoot = "5 mm";
+          rx.taconeraAltura = "15 mm";
+          rx.flandeMedal = "Medial elevado";
+          rx.material = "EVA 10 mm doble densidad o resina semirígida";
+          rx.notas.push(
+            "Notas del Profesor (8-12 años): arco medial de 15 mm y cuña medial de talón (retropié) de 5 mm.",
+            "Relación cuña:arco respetada en proporción 1:3."
+          );
+          rx.fundamentacion.push(
+            "Osificación tarsal: en el rango de 8 a 12 años el pie es menos plástico. La cuña de 5 mm y soporte de 15 mm proveen la fuerza de reacción del suelo necesaria para el control del retropié.",
+            "Consenso Delphi: el uso de cuña de retropié varo de 5 mm es efectivo para controlar la pronación y el talón valgo en escolares tardíos (PMC4282733)."
+          );
+          return rx;
+        }
+
+        // Rule 3: Age >= 12 and Talla < 41 (Juvenil/Adulto)
+        if (grado === GRADES.LEVE) {
+          rx.tipo = "Plantilla correctora semirígida (Grado Leve)";
+          rx.arcoSoporte = "12 mm";
+          rx.cunaRearfoot = "4 mm";
+          rx.taconeraAltura = "15 mm";
+          rx.flandeMedal = "Estándar";
+          rx.material = "Polipropileno con cubierta suave";
+          rx.notas.push(
+            "Paciente mayor de 12 años con pie plano leve y talla < 41: se prescribe arco medial de 12 mm y cuña de retropié de 4 mm.",
+            "Relación cuña:arco respetada en proporción 1:3."
+          );
+          rx.fundamentacion.push(
+            "Control de pronación leve: soporte de 12 mm y cuña de 4 mm proveen estabilización básica sin sobrecorregir.",
+            "CART algorithm decision tree: mild flatfoot corrective orthosis (PMC9566258)"
+          );
+        } else if (grado === GRADES.MODERADO) {
+          rx.tipo = "Plantilla correctora semirígida a medida (Grado Moderado)";
+          rx.arcoSoporte = "15 mm";
+          rx.cunaRearfoot = "5 mm";
+          rx.taconeraAltura = "20 mm";
+          rx.flandeMedal = "Medial elevado";
+          rx.material = "Polipropileno con cubierta suave";
+          rx.notas.push(
+            "Paciente mayor de 12 años con pie plano moderado y talla < 41: se prescribe arco medial de 15 mm y cuña de retropié de 5 mm.",
+            "Relación cuña:arco respetada en proporción 1:3."
+          );
+          rx.fundamentacion.push(
+            "Control intermedio: la cuña de 5 mm reduce el valgo del calcáneo y la tensión sobre el tendón del tibial posterior.",
+            "Stage I/II PTTD orthotic design guidelines (ProLab Orthotics, 2024)"
+          );
+        } else {
+          rx.tipo = "Plantilla correctora rígida a medida (Grado Severo)";
+          rx.arcoSoporte = "18 mm";
+          rx.cunaRearfoot = "6 mm";
+          rx.taconeraAltura = "25 mm, copa profunda";
+          rx.flandeMedal = "Flancos medial y lateral altos (control total)";
+          rx.material = "Polipropileno rígido o resina reforzada";
+          rx.notas.push(
+            "Paciente mayor de 12 años con pie plano severo y talla < 41: se prescribe arco medial of 18 mm y cuña de retropié de 6 mm.",
+            "Se requiere flanco medial y lateral elevados para contención y control de retropié valgo severo."
+          );
+          rx.fundamentacion.push(
+            "Control rígido de deformidades severas: el uso de cuñas de 6 mm y soporte de arco de 18 mm es el estándar de oro para pie plano severo flexible (copa tipo UCBL).",
+            "UCBL design criteria: deep heel cup and high medial/lateral flanges (FootFoot Care, 2024)"
+          );
+        }
+
+        return rx;
+      }
+
+      // ── SUB-COMPONENT: SECCION PADRES ──
+      function SeccionPadres() {
+        return (
+          <main className="padres-section">
+            <h2>Para Padres: ¿Qué es el Pie Plano?</h2>
+            <p className="padres-intro">
+              Esta sección explica de forma visual qué ocurre en el pie plano, por qué en la mayoría de los niños
+              mejora solo y cuándo sí es necesario actuar.
+            </p>
+
+            <div className="padres-card">
+              <h3>1. ¿Qué es el arco del pie y qué pasa cuando falta?</h3>
+              <div className="diagrams-row">
+                <div className="diagram-box">
+                  <svg viewBox="0 0 200 120" className="foot-svg">
+                    <text x="100" y="14" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#2b6cb0">Pie normal</text>
+                    <path d="M30 100 Q40 50 70 40 Q100 32 140 40 Q165 48 170 100 Z" fill="#fde8d0" stroke="#c07040" strokeWidth="1.5"/>
+                    <path d="M50 100 Q80 60 130 100" fill="none" stroke="#2b6cb0" strokeWidth="2.5" strokeDasharray="4,2"/>
+                    <rect x="25" y="100" width="155" height="3" rx="1" fill="#c07040" opacity="0.3"/>
+                    <path d="M30 103 Q60 103 75 103 L75 103 Q95 103 95 103 L140 103 Q155 103 168 103" fill="none" stroke="#c07040" strokeWidth="2"/>
+                    <path d="M75 103 Q100 96 125 103" fill="#f0f4f8" stroke="none"/>
+                    <text x="100" y="116" textAnchor="middle" fontSize="9" fill="#4a5568">Espacio libre bajo el arco</text>
+                    <text x="100" y="76" textAnchor="middle" fontSize="9" fill="#2b6cb0">Arco medial</text>
+                  </svg>
+                </div>
+
+                <div className="diagram-box">
+                  <svg viewBox="0 0 200 120" className="foot-svg">
+                    <text x="100" y="14" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#c05621">Pie plano</text>
+                    <path d="M30 100 Q38 70 68 60 Q100 55 140 60 Q165 68 170 100 Z" fill="#fde8d0" stroke="#c07040" strokeWidth="1.5"/>
+                    <path d="M50 100 Q85 95 130 100" fill="none" stroke="#c05621" strokeWidth="2.5"/>
+                    <rect x="25" y="100" width="155" height="3" rx="1" fill="#c07040" opacity="0.3"/>
+                    <path d="M30 103 L168 103" fill="none" stroke="#c07040" strokeWidth="2"/>
+                    <text x="100" y="116" textAnchor="middle" fontSize="9" fill="#c05621">Toda la planta toca el suelo</text>
+                    <text x="100" y="86" textAnchor="middle" fontSize="9" fill="#c05621">Arco colapsado</text>
+                    <line x1="95" y1="68" x2="95" y2="95" stroke="#e53e3e" strokeWidth="1.5" markerEnd="url(#arr)"/>
+                    <defs>
+                      <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                        <path d="M0,0 L6,3 L0,6 Z" fill="#e53e3e"/>
+                      </marker>
+                    </defs>
+                  </svg>
+                </div>
+
+                <div className="diagram-box">
+                  <svg viewBox="0 0 200 120" className="foot-svg">
+                    <text x="100" y="14" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#2d3748">Vista posterior</text>
+                    <g transform="translate(40, 20)">
+                      <text x="20" y="10" textAnchor="middle" fontSize="9" fill="#276749">Normal</text>
+                      <rect x="5" y="15" width="30" height="40" rx="15" fill="#fde8d0" stroke="#c07040" strokeWidth="1.5"/>
+                      <line x1="20" y1="55" x2="20" y2="70" stroke="#718096" strokeWidth="1.5" strokeDasharray="3,2"/>
+                      <line x1="20" y1="55" x2="20" y2="70" stroke="#276749" strokeWidth="1.5"/>
+                      <text x="20" y="80" textAnchor="middle" fontSize="8" fill="#276749">0-4° valgo</text>
+                    </g>
+                    <g transform="translate(115, 20)">
+                      <text x="25" y="10" textAnchor="middle" fontSize="9" fill="#c05621">Pie plano</text>
+                      <rect x="5" y="15" width="30" height="40" rx="15" fill="#fde8d0" stroke="#c07040" strokeWidth="1.5" transform="rotate(12, 20, 35)"/>
+                      <line x1="20" y1="55" x2="20" y2="70" stroke="#718096" strokeWidth="1.5" strokeDasharray="3,2"/>
+                      <line x1="20" y1="55" x2="30" y2="70" stroke="#c05621" strokeWidth="2"/>
+                      <text x="25" y="80" textAnchor="middle" fontSize="8" fill="#c05621">Talón valgo</text>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="padres-card">
+              <h3>2. ¿Por qué ocurre? La cadena de movimiento</h3>
+              <div className="table-wrapper">
+                <svg viewBox="0 0 640 140" className="chain-svg">
+                  {[
+                    { x: 10, label: "Ligamentos\nlaxos", color: "rgba(99, 102, 241, 0.05)", border: "#4f46e5" },
+                    { x: 145, label: "Tobillo cae\nhacia adentro", color: "rgba(239, 68, 68, 0.05)", border: "#ef4444" },
+                    { x: 280, label: "Arco medial\nse aplana", color: "rgba(245, 158, 11, 0.05)", border: "#f59e0b" },
+                    { x: 415, label: "Huella\ncompleta", color: "rgba(245, 158, 11, 0.05)", border: "#d97706" },
+                    { x: 550, label: "Talón en\nvalgo", color: "rgba(239, 68, 68, 0.05)", border: "#dc2626" },
+                  ].map((item, i) => (
+                    <g key={i}>
+                      <rect x={item.x} y="30" width="120" height="55" rx="8"
+                        fill={item.color} stroke={item.border} strokeWidth="1.5"/>
+                      {item.label.split("\n").map((line, li) => (
+                        <text key={li} x={item.x + 60} y={52 + li * 16}
+                          textAnchor="middle" fontSize="11" fill="var(--text-primary)">{line}</text>
+                      ))}
+                      {i < 4 && (
+                        <path d={`M${item.x + 122} 57 L${item.x + 142} 57`}
+                          stroke="#718096" strokeWidth="2" markerEnd="url(#arr2)"/>
+                      )}
+                    </g>
+                  ))}
+                  <defs>
+                    <marker id="arr2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+                      <path d="M0,0 L7,3.5 L0,7 Z" fill="#718096"/>
+                    </marker>
+                  </defs>
+                  <text x="320" y="115" textAnchor="middle" fontSize="10" fill="#718096">
+                    En niños pequeños esto es NORMAL — los ligamentos se tensan solos con el crecimiento
+                  </text>
+                </svg>
+              </div>
+            </div>
+
+            <div className="padres-card">
+              <h3>3. La tendencia natural: el arco aparece solo</h3>
+              <div className="mejoria-wrap">
+                <div className="table-wrapper">
+                  <svg viewBox="0 0 480 200" className="chart-svg">
+                    {[0,1,2,3,4].map(i => (
+                      <line key={i} x1="60" y1={40 + i*30} x2="440" y2={40 + i*30} stroke="var(--border-color)" strokeWidth="1"/>
+                    ))}
+                    <line x1="60" y1="160" x2="440" y2="160" stroke="var(--text-secondary)" strokeWidth="2"/>
+                    <line x1="60" y1="40" x2="60" y2="160" stroke="var(--text-secondary)" strokeWidth="2"/>
+
+                    <text x="55" y="44" textAnchor="end" fontSize="9" fill="#718096">100%</text>
+                    <text x="55" y="74" textAnchor="end" fontSize="9" fill="#718096">75%</text>
+                    <text x="55" y="104" textAnchor="end" fontSize="9" fill="#718096">50%</text>
+                    <text x="55" y="134" textAnchor="end" fontSize="9" fill="#718096">25%</text>
+                    <text x="55" y="164" textAnchor="end" fontSize="9" fill="#718096">0%</text>
+                    
+                    {[2,3,4,5,6,7,8,10].map((age, i) => {
+                      const x = 60 + i * 54;
+                      return (
+                        <text key={age} x={x} y="175" textAnchor="middle" fontSize="9" fill="var(--text-secondary)">
+                          {age}a
+                        </text>
+                      );
+                    })}
+                    <text x="250" y="193" textAnchor="middle" fontSize="10" fill="var(--text-primary)">Edad</text>
+
+                    <polyline points="60,44 114,50 168,65 222,90 276,110 330,128 384,140 438,148" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeDasharray="5,3"/>
+                    <polyline points="60,148 114,140 168,128 222,110 276,90 330,68 384,52 438,44" fill="none" stroke="#10b981" strokeWidth="2.5"/>
+                    <path d="M60,148 L114,140 L168,128 L222,110 L276,90 L330,68 L384,52 L438,44 L438,160 L60,160 Z" fill="rgba(16, 185, 129, 0.1)" stroke="none"/>
+
+                    <line x1="70" y1="20" x2="100" y2="20" stroke="#ef4444" strokeWidth="2" strokeDasharray="4,2"/>
+                    <text x="105" y="24" fontSize="9" fill="var(--text-secondary)">% con pie plano</text>
+                    <line x1="220" y1="20" x2="250" y2="20" stroke="#10b981" strokeWidth="2"/>
+                    <text x="255" y="24" fontSize="9" fill="var(--text-secondary)">% con arco normal</text>
+
+                    <rect x="310" y="95" width="125" height="32" rx="5" fill="var(--bg-note)" stroke="var(--border-note)" strokeWidth="1"/>
+                    <text x="372" y="109" textAnchor="middle" fontSize="9" fill="var(--text-note-darker)">A los 10 años:</text>
+                    <text x="372" y="122" textAnchor="middle" fontSize="9" fontWeight="bold" fill="var(--text-badge-leve)">~80% recupera arco</text>
+                  </svg>
+                </div>
+
+                <div className="mejoria-lista">
+                  <div className="mejoria-item green">
+                    <span className="mi-icon">✓</span>
+                    <div><strong>2 años:</strong> casi todos los niños tienen pie plano — es normal.</div>
+                  </div>
+                  <div className="mejoria-item green">
+                    <span className="mi-icon">✓</span>
+                    <div><strong>6 años:</strong> el 50% ya tiene arco formado de forma natural.</div>
+                  </div>
+                  <div className="mejoria-item green">
+                    <span className="mi-icon">✓</span>
+                    <div><strong>10 años:</strong> ~80% de los niños tiene arco normal espontáneamente.</div>
+                  </div>
+                  <div className="mejoria-item orange">
+                    <span className="mi-icon">!</span>
+                    <div><strong>Solo el 20%</strong> persiste con pie plano estructural en la adultez.</div>
+                  </div>
+                  <div className="mejoria-item blue">
+                    <span className="mi-icon">i</span>
+                    <div>Las plantillas <strong>no aceleran</strong> este proceso — alivian síntomas mientras el cuerpo madura.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="padres-card">
+              <h3>4. ¿Cuándo sí debo preocuparme?</h3>
+              <div className="semaforo-grid">
+                <div className="semaforo-card verde">
+                  <div className="semaforo-dot verde-dot"></div>
+                  <h4>Sin urgencia</h4>
+                  <ul>
+                    <li>Pie plano en niños menores de 6 años</li>
+                    <li>Sin dolor al caminar o correr</li>
+                    <li>El niño juega normalmente</li>
+                    <li>El arco aparece al ponerse de puntillas</li>
+                  </ul>
+                </div>
+                <div className="semaforo-card amarillo">
+                  <div className="semaforo-dot amarillo-dot"></div>
+                  <h4>Consultar</h4>
+                  <ul>
+                    <li>Dolor en el talón o la planta del pie</li>
+                    <li>Cansancio excesivo al caminar</li>
+                    <li>Mayor de 6 años sin mejora visible</li>
+                    <li>Evita actividades físicas por molestia</li>
+                  </ul>
+                </div>
+                <div className="semaforo-card rojo">
+                  <div className="semaforo-dot rojo-dot"></div>
+                  <h4>Derivar pronto</h4>
+                  <ul>
+                    <li>Pie plano rígido (el arco no se forma en puntillas)</li>
+                    <li>Dolor intenso o deformidad progresiva</li>
+                    <li>Un pie plano y el otro no</li>
+                    <li>Mayor de 10 años con pie plano severo</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* INSTRUCTIVO DE USO, RECONSULTA Y CONTROLES */}
+            <div className="padres-card">
+              <h3>5. Instructivo de Adaptación Gradual y Uso</h3>
+              <div className="mejoria-lista">
+                <div className="mejoria-item blue">
+                  <span className="mi-icon">⏱️</span>
+                  <div>
+                    <strong>Período de adaptación gradual:</strong>
+                    <ul style={{ paddingLeft: "1.2rem", marginTop: "0.25rem" }}>
+                      <li><strong>Día 1:</strong> Usar durante 1 a 2 horas únicamente.</li>
+                      <li><strong>Día 2:</strong> Usar durante 2 a 3 horas.</li>
+                      <li><strong>Día 3:</strong> Usar de 4 a 5 horas.</li>
+                      <li><strong>Día 4 en adelante:</strong> Uso a tiempo completo si no hay molestias.</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="mejoria-item green">
+                  <span className="mi-icon">✓</span>
+                  <div>
+                    <strong>Calzado adecuado:</strong> El calzado debe ser firme en el talón (contrafuerte estable), ancho en la parte delantera para no aprisionar los dedos, y preferiblemente contar con plantilla extraíble para reemplazarla por la ortesis.
+                  </div>
+                </div>
+                <div className="mejoria-item orange">
+                  <span className="mi-icon">!</span>
+                  <div>
+                    <strong>Mantenimiento e higiene:</strong> Limpiar con un paño húmedo y jabón suave. No sumergir en agua ni secar al sol directo o con secadores, ya que las temperaturas altas deforman materiales termosensibles como la EVA o el Polipropileno.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="padres-card">
+              <h3>6. Cronograma de Controles y Cuándo Reconsultar</h3>
+              <div className="semaforo-grid">
+                <div className="semaforo-card verde">
+                  <div className="semaforo-dot verde-dot"></div>
+                  <h4>Cronograma de Seguimiento</h4>
+                  <ul style={{ paddingLeft: "1.1rem" }}>
+                    <li><strong>Control Inicial (3 Meses):</strong> Evaluación obligatoria a los 3 meses del uso inicial para verificar la tolerancia, adaptación de los materiales a la pisada y evolución de la marcha.</li>
+                    <li><strong>Controles Anuales:</strong> Posteriormente, control cada 1 año para evaluar si el pie ha crecido (cambio de talla) y el progreso clínico del arco plantar.</li>
+                  </ul>
+                </div>
+                <div className="semaforo-card rojo">
+                  <div className="semaforo-dot rojo-dot"></div>
+                  <h4>Signos de Alarma (Reconsultar)</h4>
+                  <ul style={{ paddingLeft: "1.1rem" }}>
+                    <li>Enrojecimiento continuo de la piel, dolor localizado persistente o ampollas en la zona del arco medial o talón.</li>
+                    <li>Dolor que empeora o que no desaparece tras las primeras 2 semanas de uso gradual.</li>
+                    <li>Pérdida evidente de la altura o forma del arco de la plantilla (deformación del material).</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </main>
+        );
+      }
+
+      // ── SUB-COMPONENT: GUIA CLINICA ──
+      function GuiaClinica() {
+        return (
+          <main className="guia-section">
+            <h2>Guía de Clasificación y Evaluación</h2>
+
+            <details open>
+              <summary>Grados de Pie Plano</summary>
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Grado</th>
+                      <th>Descripción clínica</th>
+                      <th>Índice Staheli</th>
+                      <th>CSI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Leve (I)</td>
+                      <td>Leve contacto medial, arco visible en carga</td>
+                      <td>0.82 – 1.15</td>
+                      <td>42 – 48%</td>
+                    </tr>
+                    <tr>
+                      <td>Moderado (II)</td>
+                      <td>Colapso del arco medial visible en bipedestación</td>
+                      <td>1.15 – 1.40</td>
+                      <td>48 – 62%</td>
+                    </tr>
+                    <tr>
+                      <td>Severo (III)</td>
+                      <td>Colapso total, talón valgo marcado, abducción antepié</td>
+                      <td>&gt; 1.40</td>
+                      <td>&gt; 62%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <details>
+              <summary>Tests Clínicos Clave</summary>
+              <div className="guia-tests">
+                <div className="test-card">
+                  <h4>Navicular Drop Test</h4>
+                  <p>Medir altura del tubérculo navicular en posición neutra vs. carga completa. Descenso ≥ 10 mm = pronación excesiva.</p>
+                </div>
+                <div className="test-card">
+                  <h4>Jack's Test (puntillas)</h4>
+                  <p>Si el arco aparece al ponerse en puntillas = flexible. Si no aparece = rígido (requiere plantilla acomodativa + derivación).</p>
+                </div>
+                <div className="test-card">
+                  <h4>Single-Leg Heel Rise</h4>
+                  <p>Menos de 5 repeticiones consecutivas = sospecha de debilidad o disfunción del tendón del tibial posterior.</p>
+                </div>
+                <div className="test-card">
+                  <h4>Talón Valgo</h4>
+                  <p>Más de 8° de valgo en bipedestación indica necesidad de cuña retropié pronadora máxima (6° varo).</p>
+                </div>
+              </div>
+            </details>
+
+            <details>
+              <summary>Edad y Desarrollo del Arco</summary>
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr><th>Edad</th><th>Estado normal</th><th>Conducta</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Menor de 2 años</td><td>Pie plano fisiológico universal</td><td>No intervenir</td></tr>
+                    <tr><td>2 – 6 años</td><td>Arco en desarrollo constante</td><td>Plantillas solo si hay síntomas</td></tr>
+                    <tr><td>6 – 10 años</td><td>Arco madurando progresivamente</td><td>Plantilla si existen síntomas persistentes</td></tr>
+                    <tr><td>Mayor de 10 años</td><td>Arco ya formado por completo</td><td>Protocolo correctivo de joven / adulto</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+
+            <details>
+              <summary>Elementos de la Plantilla</summary>
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr><th>Elemento</th><th>Función</th><th>Valores habituales</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Cuña retropié</td><td>Reduce pronación subtalar (prescrita en grados °)</td><td>4° estándar (máx. 6°). <br /><small style={{color: "var(--text-muted)", fontSize: "0.75rem"}}>*Grosor físico de taller: aprox. 1/3 de la altura del arco.*</small></td></tr>
+                    <tr><td>Cuña antepié</td><td>Corrige varo/valgo de antepié (prescrita en grados °)</td><td>0-6° según valoración</td></tr>
+                    <tr><td>Soporte arco medial</td><td>Sostiene arco longitudinal medial</td><td>Mínimo / estándar / máximo</td></tr>
+                    <tr><td>Flanco medial</td><td>Control total del pie en la copa</td><td>Alto en UCBL</td></tr>
+                    <tr><td>Barra retrocapital</td><td>Descarga metatarsal amplia</td><td>3-5 mm retrocapital</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </main>
+        );
+      }
+      function RxItem({ label, value, highlight, className }) {
+        return (
+          <div className={"rx-item" + (highlight ? " rx-highlight" : "") + (className ? " " + className : "")}>
+            <span className="rx-label">{label}</span>
+            <span className="rx-value">{value}</span>
+          </div>
+        );
+      }
+
+      function InsoleDiagram({ rx }) {
+        if (!rx || !rx.indicacion) return null;
+
+        const hasMetatarsalPad = !!rx.padMetatarsal;
+        const hasRearfootWedge = rx.cunaRearfoot && rx.cunaRearfoot !== "0°" && rx.cunaRearfoot !== "0 mm" && !rx.cunaRearfoot.includes("sin cuña") && rx.cunaRearfoot !== "0";
+        const cunaRearfootText = hasRearfootWedge ? rx.cunaRearfoot : "";
+        const hasForefootWedge = rx.cunaForefoot && rx.cunaForefoot !== "0°" && rx.cunaForefoot !== "0 mm" && rx.cunaForefoot !== "0";
+        const cunaForefootText = hasForefootWedge ? rx.cunaForefoot : "";
+
+        let archPeakY = 53;
+        let archText = `Arco: ${rx.arcoSoporte}`;
+        const archTextLower = rx.arcoSoporte.toLowerCase();
+        if (archTextLower.includes("18 mm") || archTextLower.includes("máximo")) {
+          archPeakY = 25;
+        } else if (archTextLower.includes("15 mm") || archTextLower.includes("medio") || archTextLower.includes("estándar")) {
+          archPeakY = 38;
+        } else if (archTextLower.includes("12 mm") || archTextLower.includes("8 mm") || archTextLower.includes("suave") || archTextLower.includes("mínimo")) {
+          archPeakY = 46;
+        }
+
+        const renderInsoleTop = (isLeft) => {
+          const side = isLeft ? "izquierdo" : "derecho";
+          const isShorter = rx.alzaTalon && rx.alzaTalon.pie === side;
+          return (
+            <g transform={isLeft ? "translate(100, 0) scale(-1, 1)" : ""}>
+              {/* Plantilla Base */}
+              <path 
+                d="M50 210 C36 210 26 195 24 165 C22 135 28 100 24 70 C22 50 22 30 32 18 C42 6 58 6 68 18 C78 30 76 50 78 70 C80 100 78 135 76 165 C74 195 64 210 50 210 Z" 
+                fill="var(--bg-card)" 
+                stroke="var(--accent)" 
+                strokeWidth="2" 
+              />
+              
+              {/* Contorno interno técnico */}
+              <path 
+                d="M50 202 C38 202 30 185 28 152 C24 122 31 93 29 68 C27 49 27 31 35 21 C43 11 57 11 65 21 C73 31 73 49 71 68 C69 93 76 122 72 152 C70 185 62 202 50 202 Z" 
+                fill="none" 
+                stroke="var(--border-color)" 
+                strokeWidth="0.75" 
+                opacity="0.5" 
+              />
+
+              {/* Ejes Técnicos y Líneas de Referencia */}
+              <line x1="50" y1="10" x2="50" y2="210" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="5,2,2,2" opacity="0.3" />
+              <line x1="10" y1="78" x2="90" y2="78" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.3" />
+              <line x1="10" y1="125" x2="90" y2="125" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.3" />
+              <line x1="10" y1="180" x2="90" y2="180" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.3" />
+
+              {/* Elevación del Arco Medial */}
+              <path 
+                d="M25 150 C20 120 30 90 28 65 C38 75 42 100 40 125 C38 140 32 148 25 150 Z" 
+                fill="url(#archGradTop)" 
+                stroke="var(--accent)" 
+                strokeWidth="1" 
+                opacity={archPeakY === 25 ? 0.95 : archPeakY === 38 ? 0.65 : 0.35}
+              />
+
+              {/* Cuña Retropié Varo */}
+              {hasRearfootWedge && (
+                <path 
+                  d="M50 210 C36 210 26 195 24 165 C31 160 40 175 44 190 C46 198 50 210 50 210 Z" 
+                  fill="rgba(239, 68, 68, 0.4)" 
+                  stroke="#ef4444" 
+                  strokeWidth="1" 
+                />
+              )}
+
+              {/* Cuña Antepié Varo */}
+              {hasForefootWedge && (
+                <path 
+                  d="M28 70 C25 50 25 30 32 18 C35 28 35 48 32 58 Z" 
+                  fill="rgba(239, 68, 68, 0.3)" 
+                  stroke="#ef4444" 
+                  strokeWidth="1" 
+                />
+              )}
+
+              {/* Barra Retrocapital */}
+              {hasMetatarsalPad && (
+                <path 
+                  d="M 28 82 C 28 78, 72 78, 72 82 C 72 85, 28 85, 28 82 Z" 
+                  fill="rgba(245, 158, 11, 0.75)" 
+                  stroke="#d97706" 
+                  strokeWidth="1" 
+                />
+              )}
+              
+              {/* Alza de talón (Dismetria) */}
+              {isShorter && (
+                <path 
+                  d="M50 210 C36 210 28 190 32 170 C35 155 45 155 50 155 C55 155 65 155 68 170 C72 190 64 210 50 210 Z" 
+                  fill="rgba(180, 83, 9, 0.15)" 
+                  stroke="#b45309" 
+                  strokeWidth="1" 
+                  strokeDasharray="2,1"
+                />
+              )}
+
+              {/* Barra de Escala */}
+              <g transform="translate(8, 202)" opacity="0.4">
+                <line x1="0" y1="0" x2="20" y2="0" stroke="var(--text-secondary)" strokeWidth="0.75" />
+                <line x1="0" y1="-2" x2="0" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
+                <line x1="20" y1="-2" x2="20" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
+              </g>
+            </g>
+          );
+        };
+
+        const renderInsoleSide = (isLeft) => {
+          const side = isLeft ? "izquierdo" : "derecho";
+          const isShorter = rx.alzaTalon && rx.alzaTalon.pie === side;
+          const liftVal = isShorter ? rx.alzaTalon.valor : 0;
+          const liftHeightPx = Math.min(liftVal * 0.75, 18);
+
+          return (
+            <g transform={isLeft ? "translate(200, 0) scale(-1, 1)" : ""}>
+              {/* Base longitudinal de la plantilla */}
+              <path 
+                d="M 15 70 C 50 70 70 70 100 70 C 130 70 160 70 180 70 C 188 70 190 57 190 47 C 190 37 185 37 182 47 C 178 57 165 60 150 60 C 120 60 100 60 15 65 Z" 
+                fill="var(--bg-item-rx)" 
+                stroke="var(--border-color)" 
+                strokeWidth="2" 
+              />
+              
+              {/* Curvatura del Arco Medial */}
+              <path 
+                d={`M 60 70 C 80 ${archPeakY + 5} 110 ${archPeakY + 5} 140 70 Z`} 
+                fill="url(#archGradSide)" 
+                stroke="var(--accent)" 
+                strokeWidth="2" 
+              />
+
+              {/* Ejes Técnicos Laterales */}
+              <line x1="15" y1="70" x2="185" y2="70" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="4,4" opacity="0.3" />
+              <line x1="100" y1="20" x2="100" y2="85" stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="4,4" opacity="0.2" />
+
+              {/* Alza de talón por Dismetría */}
+              {isShorter && liftHeightPx > 0 && (
+                <path 
+                  d={`M 115 70 C 135 70 160 70 180 70 C 188 70 188 ${70 + liftHeightPx} C 180 ${70 + liftHeightPx} 135 ${70 + liftHeightPx} 115 70 Z`} 
+                  fill="rgba(180, 83, 9, 0.85)" 
+                  stroke="#78350f" 
+                  strokeWidth="1.5" 
+                />
+              )}
+
+              {/* Escala lateral */}
+              <g transform="translate(165, 25)" opacity="0.4">
+                <line x1="0" y1="0" x2="20" y2="0" stroke="var(--text-secondary)" strokeWidth="0.75" />
+                <line x1="0" y1="-2" x2="0" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
+                <line x1="20" y1="-2" x2="20" y2="2" stroke="var(--text-secondary)" strokeWidth="0.75" />
+              </g>
+            </g>
+          );
+        };
+
+        return (
+          <div className="insole-diagrams">
+            {/* SVG oculto con las definiciones globales de degradados y patrones */}
+            <svg style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
+              <defs>
+                <pattern id="gridPattern" width="10" height="10" patternUnits="userSpaceOnUse">
+                  <path d="M 10 0 L 0 0 0 10" fill="none" stroke="var(--border-color)" strokeWidth="0.5" opacity="0.3" />
+                </pattern>
+                <linearGradient id="archGradTop" x1="0%" y1="50%" x2="100%" y2="50%">
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.15" />
+                </linearGradient>
+                <linearGradient id="archGradSide" x1="0%" y1="100%" x2="0%" y2="0%">
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.05" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            <h3>Diseño Técnico y Ajustes Mecánicos (Pies Izquierdo y Derecho)</h3>
+            
+            <div className="diagram-card" style={{ marginBottom: "1rem" }}>
+              <h4>Vistas Superiores (Moldes Técnicos)</h4>
+              <div className="diagrams-dual-row">
+                <div className="diagram-side-box">
+                  <h5>Pie Izquierdo</h5>
+                  <svg viewBox="0 0 100 220" className="insole-svg">
+                    <rect width="100" height="220" fill="url(#gridPattern)" />
+                    {renderInsoleTop(true)}
+                    <text x="50" y="215" textAnchor="middle" fontSize="6" fontWeight="bold">TALÓN</text>
+                    <text x="50" y="12" textAnchor="middle" fontSize="6" fontWeight="bold">PUNTA</text>
+                    <text x="73" y="110" textAnchor="middle" fontSize="5" fill="var(--accent)" transform="rotate(90, 73, 110)">{archText}</text>
+                    {hasMetatarsalPad && <text x="50" y="90" fontSize="5" fill="#d97706" fontWeight="bold" textAnchor="middle">Barra R.</text>}
+                    {hasRearfootWedge && <text x="86" y="195" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="start">← Cuña V. ({cunaRearfootText})</text>}
+                    {hasForefootWedge && <text x="88" y="35" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="start">← Cuña A. ({cunaForefootText})</text>}
+                    {rx.alzaTalon && rx.alzaTalon.pie === "izquierdo" && (
+                      <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor} mm</text>
+                    )}
+                    <text x="10" y="197" fontSize="4" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+                  </svg>
+                </div>
+                <div className="diagram-side-box">
+                  <h5>Pie Derecho</h5>
+                  <svg viewBox="0 0 100 220" className="insole-svg">
+                    <rect width="100" height="220" fill="url(#gridPattern)" />
+                    {renderInsoleTop(false)}
+                    <text x="50" y="215" textAnchor="middle" fontSize="6" fontWeight="bold">TALÓN</text>
+                    <text x="50" y="12" textAnchor="middle" fontSize="6" fontWeight="bold">PUNTA</text>
+                    <text x="27" y="110" textAnchor="middle" fontSize="5" fill="var(--accent)" transform="rotate(-90, 27, 110)">{archText}</text>
+                    {hasMetatarsalPad && <text x="50" y="90" fontSize="5" fill="#d97706" fontWeight="bold" textAnchor="middle">Barra R.</text>}
+                    {hasRearfootWedge && <text x="14" y="195" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="end">Cuña V. ({cunaRearfootText}) →</text>}
+                    {hasForefootWedge && <text x="12" y="35" fontSize="5" fill="#ef4444" fontWeight="bold" textAnchor="end">Cuña A. ({cunaForefootText}) →</text>}
+                    {rx.alzaTalon && rx.alzaTalon.pie === "derecho" && (
+                      <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor} mm</text>
+                    )}
+                    <text x="90" y="197" textAnchor="end" fontSize="4" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="diagram-card">
+              <h4>Vistas Laterales (Perfiles Mediales)</h4>
+              <div className="diagrams-dual-row">
+                <div className="diagram-side-box">
+                  <h5>Pie Izquierdo</h5>
+                  <svg viewBox="0 0 200 100" className="insole-svg-wide">
+                    {renderInsoleSide(true)}
+                    <text x="185" y="82" fontSize="7" fontWeight="bold">PUNTA</text>
+                    <text x="15" y="82" textAnchor="start" fontSize="7" fontWeight="bold">TALÓN</text>
+                    <text x="100" y={archPeakY} textAnchor="middle" fontSize="6" fill="var(--accent)" fontWeight="bold">{archText}</text>
+                    {rx.alzaTalon && rx.alzaTalon.pie === "izquierdo" && (
+                      <text x="45" y="93" textAnchor="start" fontSize="6.5" fill="#b45309" fontWeight="bold">Alza de talón +{rx.alzaTalon.valor} mm</text>
+                    )}
+                    <text x="175" y="20" textAnchor="end" fontSize="5.5" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+                  </svg>
+                </div>
+                <div className="diagram-side-box">
+                  <h5>Pie Derecho</h5>
+                  <svg viewBox="0 0 200 100" className="insole-svg-wide">
+                    {renderInsoleSide(false)}
+                    <text x="15" y="82" fontSize="7" fontWeight="bold">PUNTA</text>
+                    <text x="185" y="82" textAnchor="end" fontSize="7" fontWeight="bold">TALÓN</text>
+                    <text x="100" y={archPeakY} textAnchor="middle" fontSize="6" fill="var(--accent)" fontWeight="bold">{archText}</text>
+                    {rx.alzaTalon && rx.alzaTalon.pie === "derecho" && (
+                      <text x="155" y="93" textAnchor="end" fontSize="6.5" fill="#b45309" fontWeight="bold">Alza de talón +{rx.alzaTalon.valor} mm</text>
+                    )}
+                    <text x="25" y="20" textAnchor="start" fontSize="5.5" fill="var(--text-muted)" opacity="0.6">Scale 20mm</text>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ── MAIN APP COMPONENT ──
+      const REGISTRY_KEY = "plantillas_registry_local";
+
+      function loadRegistry() {
+        try {
+          return JSON.parse(localStorage.getItem(REGISTRY_KEY) || "[]");
+        } catch {
+          return [];
+        }
+      }
+
+      function saveRegistry(entries) {
+        try {
+          localStorage.setItem(REGISTRY_KEY, JSON.stringify(entries));
+        } catch (e) {
+          console.error("Error saving registry to localStorage", e);
+        }
+      }
+
+      function newId() {
+        return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      }
+
+      function App() {
+        const [tab, setTab] = useState("nueva");
+        const [form, setForm] = useState({
+          paciente: "",
+          talla: "",
+          edad: "",
+          grado: GRADES.LEVE,
+          sintomas: true,
+          flexible: true,
+          barraRetrocapital: false,
+          dismetriaActiva: false,
+          dismetriaPie: "izquierdo",
+          dismetriaValor: "5",
+          especialista: localStorage.getItem("especialista_nombre") || "Dr. Bruno Hazleby Soto",
+          especialidad: localStorage.getItem("especialista_especialidad") || "Traumatología y Ortopedia Infantil",
+          especialistaRut: localStorage.getItem("especialista_rut") || "17.618.006-4",
+          observaciones: "",
+        });
+        const [result, setResult] = useState(null);
+        const [error, setError] = useState("");
+        const [registry, setRegistry] = useState(loadRegistry);
+        const [savedMsg, setSavedMsg] = useState("");
+
+        useEffect(() => {
+          saveRegistry(registry);
+        }, [registry]);
+
+        function handleChange(e) {
+          const { name, value, type, checked } = e.target;
+          setForm((f) => {
+            const updated = { ...f, [name]: type === "checkbox" ? checked : value };
+            if (name === "especialista") {
+              localStorage.setItem("especialista_nombre", value);
+            }
+            if (name === "especialidad") {
+              localStorage.setItem("especialista_especialidad", value);
+            }
+            if (name === "especialistaRut") {
+              localStorage.setItem("especialista_rut", value);
+            }
+            return updated;
+          });
+          setResult(null);
+          setError("");
+          setSavedMsg("");
+        }
+
+        function handleCalcular(e) {
+          e.preventDefault();
+          const talla = parseInt(form.talla);
+          const edad = parseInt(form.edad);
+          if (!talla || talla < 10 || talla > 52) {
+            setError("Ingresa una talla válida (10-52 EU).");
+            return;
+          }
+          if (!edad || edad < 1 || edad > 110) {
+            setError("Ingresa una edad válida.");
+            return;
+          }
+          const rx = generatePrescription({
+            talla,
+            edad,
+            grado: form.grado,
+            sintomas: form.sintomas,
+            flexible: form.flexible,
+            barraRetrocapital: form.barraRetrocapital,
+            dismetriaActiva: form.dismetriaActiva,
+            dismetriaPie: form.dismetriaPie,
+            dismetriaValor: parseInt(form.dismetriaValor) || 0,
+          });
+          if (rx.error) {
+            setError(rx.error);
+            setResult(null);
+            return;
+          }
+          const hoy = new Date();
+          let meses = 3;
+          if (rx.controles) {
+            const ctrl = rx.controles.toLowerCase();
+            if (ctrl.includes("anual")) {
+              meses = 12;
+            } else if (ctrl.includes("6 meses")) {
+              meses = 6;
+            } else if (ctrl.includes("3 meses")) {
+              meses = 3;
+            }
+          }
+          const controlDate = new Date(hoy.getFullYear(), hoy.getMonth() + meses, hoy.getDate());
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          rx.fechaControl = controlDate.toLocaleDateString("es-CL", options);
+          setResult(rx);
+          setError("");
+        }
+
+        function handleGuardar() {
+          if (!result || !result.indicacion) return;
+          const entry = {
+            id: newId(),
+            fecha: new Date().toLocaleDateString("es-CL"),
+            paciente: form.paciente || "Sin nombre",
+            talla: form.talla,
+            edad: form.edad,
+            grado: form.grado,
+            sintomas: form.sintomas,
+            flexible: form.flexible,
+            barraRetrocapital: form.barraRetrocapital,
+            dismetriaActiva: form.dismetriaActiva,
+            dismetriaPie: form.dismetriaPie,
+            dismetriaValor: form.dismetriaValor,
+            especialista: form.especialista,
+            especialidad: form.especialidad,
+            especialistaRut: form.especialistaRut,
+            observaciones: form.observaciones,
+            prescripcion: result,
+          };
+          setRegistry((r) => [entry, ...r]);
+          setSavedMsg("Guardado en el registro.");
+        }
+
+        function handleEliminar(id) {
+          if (!confirm("¿Deseas eliminar este registro?")) return;
+          setRegistry((r) => r.filter((e) => e.id !== id));
+        }
+
+        const gradeLabel = { leve: "Leve (I)", moderado: "Moderado (II)", severo: "Severo (III)" };
+
+        return (
+          <div className="app">
+            <header>
+              <h1>Calculadora de Plantillas — Pie Plano</h1>
+              <p className="subtitle">Prescripción basada en evidencia clínica y biomecánica</p>
+              <nav>
+                <button className={tab === "nueva" ? "active" : ""} onClick={() => setTab("nueva")}>
+                  Nueva Prescripción
+                </button>
+                <button className={tab === "registro" ? "active" : ""} onClick={() => setTab("registro")}>
+                  Registro ({registry.length})
+                </button>
+                <button className={tab === "guia" ? "active" : ""} onClick={() => setTab("guia")}>
+                  Guía Clínica
+                </button>
+                <button className={tab === "padres" ? "active" : ""} onClick={() => setTab("padres")}>
+                  Para Padres
+                </button>
+              </nav>
+            </header>
+
+            {tab === "nueva" && (
+              <main className="main-grid">
+                <section className="form-section">
+                  <h2>Datos del Paciente</h2>
+                  <form onSubmit={handleCalcular}>
+                    <label>
+                      Nombre del Paciente (opcional)
+                      <input
+                        name="paciente"
+                        value={form.paciente}
+                        onChange={handleChange}
+                        placeholder="Nombre o código"
+                      />
+                    </label>
+
+                    <label>
+                      Talla del Calzado (EU) *
+                      <input
+                        name="talla"
+                        type="number"
+                        value={form.talla}
+                        onChange={handleChange}
+                        min="10"
+                        max="52"
+                        placeholder="Ej: 36"
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      Edad (años) *
+                      <input
+                        name="edad"
+                        type="number"
+                        value={form.edad}
+                        onChange={handleChange}
+                        min="1"
+                        max="110"
+                        placeholder="Ej: 8"
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      Grado de Pie Plano *
+                      <select name="grado" value={form.grado} onChange={handleChange}>
+                        <option value={GRADES.LEVE}>Leve (I) — Huella con leve contacto medial</option>
+                        <option value={GRADES.MODERADO}>Moderado (II) — Colapso del arco visible</option>
+                        <option value={GRADES.SEVERO}>Severo (III) — Colapso total, talón valgo marcado</option>
+                      </select>
+                    </label>
+
+                    <fieldset>
+                      <legend>Características Clínicas</legend>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="sintomas"
+                          checked={form.sintomas}
+                          onChange={handleChange}
+                        />
+                        Presenta síntomas (dolor, fatiga, cansancio)
+                      </label>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="flexible"
+                          checked={form.flexible}
+                          onChange={handleChange}
+                        />
+                        Pie plano flexible (arco aparece en puntillas)
+                      </label>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="barraRetrocapital"
+                          checked={form.barraRetrocapital}
+                          onChange={handleChange}
+                        />
+                        Incluir barra retrocapital (descarga metatarsal)
+                      </label>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Dismetria (Longitud de piernas)</legend>
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="dismetriaActiva"
+                          checked={form.dismetriaActiva}
+                          onChange={handleChange}
+                        />
+                        ¿Presenta discrepancia de longitud de piernas?
+                      </label>
+                      {form.dismetriaActiva && (
+                        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                          <label style={{ flex: 1, marginBottom: 0 }}>
+                            Pie más corto
+                            <select name="dismetriaPie" value={form.dismetriaPie} onChange={handleChange}>
+                              <option value="izquierdo">Izquierdo</option>
+                              <option value="derecho">Derecho</option>
+                            </select>
+                          </label>
+                          <label style={{ flex: 1, marginBottom: 0 }}>
+                            Acortamiento (mm)
+                            <input
+                              name="dismetriaValor"
+                              type="number"
+                              min="2"
+                              max="30"
+                              value={form.dismetriaValor}
+                              onChange={handleChange}
+                              required
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Datos del Especialista</legend>
+                      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                        <label style={{ flex: 2, marginBottom: 0 }}>
+                          Nombre del Especialista
+                          <input
+                            name="especialista"
+                            value={form.especialista}
+                            onChange={handleChange}
+                            placeholder="Ej: Dr. Juan Pérez"
+                          />
+                        </label>
+                        <label style={{ flex: 2, marginBottom: 0 }}>
+                          Especialidad
+                          <input
+                            name="especialidad"
+                            value={form.especialidad}
+                            onChange={handleChange}
+                            placeholder="Ej: Ortopedia Infantil"
+                          />
+                        </label>
+                        <label style={{ flex: 1, marginBottom: 0 }}>
+                          RUT
+                          <input
+                            name="especialistaRut"
+                            value={form.especialistaRut}
+                            onChange={handleChange}
+                            placeholder="Ej: 17.618.006-4"
+                          />
+                        </label>
+                      </div>
+                    </fieldset>
+
+                    <fieldset>
+                      <legend>Observaciones Clínicas</legend>
+                      <label style={{ marginBottom: 0 }}>
+                        Indicaciones adicionales (se imprimirán en la receta)
+                        <textarea
+                          name="observaciones"
+                          value={form.observaciones}
+                          onChange={handleChange}
+                          placeholder="Ej: Usar con calzado deportivo firme, realizar elongaciones diarias, etc."
+                          rows="3"
+                          style={{ width: "100%", marginTop: "0.25rem", fontFamily: "inherit", padding: "0.5rem", borderRadius: "4px", border: "1px solid var(--border-color)", background: "var(--bg-card)", color: "var(--text-main)", resize: "vertical" }}
+                        />
+                      </label>
+                    </fieldset>
+
+                    {error && <p className="error">{error}</p>}
+
+                    <button type="submit" className="btn-primary">
+                      Generar Prescripción
+                    </button>
+                  </form>
+                </section>
+
+                {result && (
+                  <section className="result-section">
+                    {!result.indicacion ? (
+                      <div className="no-indicacion">
+                        <h2>Sin indicación de plantilla</h2>
+                        <p className="mensaje">{result.mensaje}</p>
+                        <ul>
+                          {result.recomendaciones && result.recomendaciones.map((r, i) => (
+                            <li key={i}>{r}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="rx-header">
+                          <h2>Prescripción de Plantilla</h2>
+                          <div className="rx-meta">
+                            {form.paciente && <span>{form.paciente}</span>}
+                            <span>Talla {form.talla} EU</span>
+                            <span>{form.edad} años</span>
+                            <span className={"badge badge-" + form.grado}>{gradeLabel[form.grado]}</span>
+                          </div>
+                        </div>
+
+                        <div className="rx-grid">
+                          <RxItem label="Tipo de Ortesis" value={result.tipo} highlight={true} />
+                          <RxItem label="Soporte de Arco" value={result.arcoSoporte} />
+                          <RxItem label="Cuña Retropié" value={result.cunaRearfoot} />
+                          <RxItem label="Cuña Antepié" value={result.cunaForefoot} />
+                          <RxItem label="Flanco Medial" value={result.flandeMedal} />
+                          <RxItem label="Barra Retrocapital" value={result.padMetatarsal ? "4 mm" : "No"} />
+                          <RxItem label="Material" value={result.material} className="print-hide" />
+                          <RxItem label="Longitud" value={result.longitud} className="print-hide" />
+                          <RxItem label="Controles" value={result.controles} className="print-hide" />
+                        </div>
+
+                        {form.observaciones && (
+                          <div className="print-observaciones" style={{ marginTop: "1rem", borderLeft: "4px solid var(--accent)", paddingLeft: "1rem" }}>
+                            <strong>Indicaciones del Especialista:</strong>
+                            <p style={{ whiteSpace: "pre-wrap", fontSize: "0.95rem", margin: "0.25rem 0 0 0" }}>{form.observaciones}</p>
+                          </div>
+                        )}
+
+                        {result.notes && result.notes.length > 0 && (
+                          <div className="notas">
+                            <h3>Notas Clínicas</h3>
+                            <ul>
+                              {result.notes.map((n, i) => (
+                                <li key={i}>{n}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {result.fundamentacion && result.fundamentacion.length > 0 && (
+                          <details className="fundamentacion">
+                            <summary>Fundamentación Bibliográfica</summary>
+                            <ul>
+                              {result.fundamentacion.map((f, i) => (
+                                <li key={i}>{f}</li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
+
+                        <InsoleDiagram rx={result} />
+
+                        <div className="print-only signature-block">
+                          <div className="signature-line">____________________________________</div>
+                          <div>{form.especialista || "[Nombre del Especialista]"}</div>
+                          <div>{form.especialidad || "[Especialidad]"}</div>
+                          {form.especialistaRut && <div>RUT: {form.especialistaRut}</div>}
+                          <div style={{ marginTop: "0.25rem" }}>Próximo Control Sugerido: <strong>{result.fechaControl}</strong></div>
+                        </div>
+                        <div className="rx-actions">
+                          <button className="btn-save" onClick={handleGuardar}>
+                            Guardar en Registro
+                          </button>
+                          <button className="btn-print" onClick={() => window.print()}>
+                            🖨️ Imprimir Receta
+                          </button>
+                          {savedMsg && <span className="saved-msg">{savedMsg}</span>}
+                        </div>
+
+                        {/* PÁGINA 2 PARA IMPRESIÓN (Guía para Padres) */}
+                        <div className="print-page-2">
+                          <div className="print-header">
+                            <h2>Guía de Uso y Seguimiento Clínico para Padres</h2>
+                            <p>Paciente: {form.paciente || "Sin nombre"} · Fecha: {new Date().toLocaleDateString("es-CL")}</p>
+                            {form.especialista && (
+                              <p style={{ marginTop: "0.25rem", fontWeight: "bold" }}>
+                                Especialista: {form.especialista} {form.especialidad ? `· ${form.especialidad}` : ""} {form.especialistaRut ? `· RUT: ${form.especialistaRut}` : ""}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="print-card">
+                            <h3>5. Instructivo de Adaptación Gradual y Uso</h3>
+                            <p>Para asegurar una adaptación adecuada y evitar molestias, siga este esquema:</p>
+                            <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0" }}>
+                              <li><strong>Día 1:</strong> Usar durante 1 a 2 horas únicamente.</li>
+                              <li><strong>Día 2:</strong> Usar durante 2 a 3 horas.</li>
+                              <li><strong>Día 3:</strong> Usar de 4 a 5 horas.</li>
+                              <li><strong>Día 4 en adelante:</strong> Uso a tiempo completo si no hay molestias.</li>
+                            </ul>
+                            <p style={{ marginTop: "0.5rem" }}>
+                              <strong>Calzado adecuado:</strong> El zapato debe ser firme en el talón (contrafuerte estable), ancho en la parte delantera para no aprisionar los dedos, y de preferencia contar con plantilla extraíble.
+                            </p>
+                            <p style={{ marginTop: "0.5rem" }}>
+                              <strong>Mantenimiento e higiene:</strong> Limpiar con un paño húmedo y jabón suave. No sumergir en agua ni secar al sol directo o con calor artificial (radiadores o secadores), ya que deforma los materiales ortésicos (EVA/Polipropileno).
+                            </p>
+                          </div>
+
+                          <div className="print-card" style={{ marginTop: "1.5rem" }}>
+                            <h3>6. Cronograma de Controles y Cuándo Reconsultar</h3>
+                            <p><strong>Calendario de Revisiones:</strong></p>
+                            <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0" }}>
+                              <li><strong>Control Inicial (3 Meses):</strong> Programar para la fecha estimada: <strong>{result.fechaControl}</strong>. Este control evalúa la tolerancia del niño, adaptación del material y la marcha.</li>
+                              <li><strong>Controles Anuales Posteriores:</strong> Cada 1 año para evaluar crecimiento, cambio de talla y evolución clínica del arco.</li>
+                            </ul>
+                            <p style={{ marginTop: "0.5rem" }}>
+                              <strong>Signos de alarma (Reconsulta inmediata):</strong>
+                            </p>
+                            <ul style={{ paddingLeft: "1.2rem", margin: "0.5rem 0" }}>
+                              <li>Presencia de enrojecimiento continuo de la piel, dolor localizado persistente o ampollas en la zona del arco medial.</li>
+                              <li>Dolor que no desaparece tras las primeras 2 semanas de uso gradual.</li>
+                            </ul>
+                          </div>
+                          <div className="print-only signature-block" style={{ marginTop: "2rem" }}>
+                            <div className="signature-line">____________________________________</div>
+                            <div>{form.especialista || "[Nombre del Especialista]"}</div>
+                            <div>{form.especialidad || "[Especialidad]"}</div>
+                            {form.especialistaRut && <div>RUT: {form.especialistaRut}</div>}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </section>
+                )}
+              </main>
+            )}
+
+            {tab === "registro" && (
+              <main className="registro-section">
+                <h2>Registro de Prescripciones</h2>
+                {registry.length === 0 ? (
+                  <p className="empty">No hay prescripciones guardadas.</p>
+                ) : (
+                  <div className="registro-list">
+                    {registry.map((entry) => (
+                      <div key={entry.id} className="registro-card">
+                        <div className="reg-header">
+                          <span className="reg-paciente">{entry.paciente}</span>
+                          <span className="reg-fecha">{entry.fecha}</span>
+                          <span className={"badge badge-" + entry.grado}>{gradeLabel[entry.grado]}</span>
+                          <button className="btn-delete" onClick={() => handleEliminar(entry.id)}>
+                            ✕
+                          </button>
+                        </div>
+                        <div className="reg-details">
+                          <span>Talla {entry.talla} EU</span>
+                          <span>{entry.edad} años</span>
+                          <span>{entry.flexible ? "Flexible" : "Rígido"}</span>
+                          <span>{entry.sintomas ? "Sintomático" : "Asintomático"}</span>
+                        </div>
+                        <div className="reg-tipo">{entry.prescripcion.tipo || entry.prescripcion.mensaje}</div>
+                        <details className="reg-full">
+                          <summary>Ver prescripción completa</summary>
+                          <div className="rx-grid compact">
+                            {entry.prescripcion.indicacion && (
+                              <>
+                                <RxItem label="Tipo" value={entry.prescripcion.tipo} />
+                                <RxItem label="Soporte Arco" value={entry.prescripcion.arcoSoporte} />
+                                <RxItem label="Copa Talón" value={entry.prescripcion.taconeraAltura} />
+                                <RxItem label="Cuña Retropié" value={entry.prescripcion.cunaRearfoot} />
+                                <RxItem label="Cuña Antepié" value={entry.prescripcion.cunaForefoot} />
+                                <RxItem label="Material" value={entry.prescripcion.material} />
+                                <RxItem label="Controles" value={entry.prescripcion.controles} />
+                              </>
+                            )}
+                            {entry.prescripcion.notas && entry.prescripcion.notas.map((n, i) => (
+                              <p key={i} className="nota-small">{n}</p>
+                            ))}
+                          </div>
+                        </details>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </main>
+            )}
+
+            {tab === "guia" && <GuiaClinica />}
+            {tab === "padres" && <SeccionPadres />}
+
+            <footer>
+              <p>
+                Basado en: Delphi Consensus (PMC4282733) · PTTD Staging (ProLab Orthotics) · Decision Tree (PMC9566258) · Pediatric Study (PMC9561439)
+                <br />
+                Herramienta de apoyo clínico — no reemplaza la evaluación médica profesional.
+              </p>
+            </footer>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
