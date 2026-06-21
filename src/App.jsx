@@ -335,7 +335,7 @@ export default function App() {
                   <div className="rx-grid">
                     <RxItem label="Tipo de Ortesis" value={result.tipo} highlight={true} />
                     <RxItem label={isCavo ? "Arco Lateral (mm)" : "Arco Medial (mm)"} value={result.arcoSoporte} />
-                    {!isCavo && result.skiveKirbyMm > 0 && <RxItem label="Kirby Skive Medial" value={`${result.skiveKirbyMm} mm`} />}
+                    {!isCavo && result.skiveKirbyMm > 0 && <RxItem label="Kirby Skive Medial *opcional" value={`${result.skiveKirbyMm} mm`} />}
                     <RxItem label="Cuña Retropié" value={result.cunaRearfoot !== "0" ? `${result.cunaRearfoot} (${result.cunaRearfootTipo})` : "No"} />
                     {!isCavo && <RxItem label="Flanco Medial" value={result.flancoMedial} />}
                     <RxItem label="Barra Retrocapital" value={result.barraRetrocapitalMm > 0 ? `${result.barraRetrocapitalMm} mm` : "No"} />
@@ -681,6 +681,8 @@ function InsoleDiagram({ rx, form }) {
   const hasForefootWedge = !isCavo && rx.cunaForefoot && rx.cunaForefoot !== "0°" && rx.cunaForefoot !== "0 mm" && rx.cunaForefoot !== "0" && rx.cunaForefoot !== "N/A";
   const cavoWedgeExt = isCavo && rx.cunaRearfoot && rx.cunaRearfoot.includes("Ext");
   const hasCutOut = isCavo && rx.cutOut;
+  const skiveMm = (!isCavo && rx.skiveKirbyMm) ? rx.skiveKirbyMm : 0;
+  const hasSkive = skiveMm > 0;
 
   const archMm = parseInt(rx.arcoSoporte) || 0;
   const archText = isCavo ? "Arco lateral: " + rx.arcoSoporte : "Arco: " + rx.arcoSoporte;
@@ -747,6 +749,13 @@ function InsoleDiagram({ rx, form }) {
         <line x1="50" y1="12" x2="50" y2="208" stroke="var(--text-muted)" strokeWidth="0.4" strokeDasharray="4,3" opacity="0.2"/>
         {archZone}
         {wedgeZone}
+        {hasSkive && (
+          /* Kirby Medial Heel Skive: crescent on medial (left) side of heel */
+          <path
+            d="M26 200 C20 193 20 180 26 174 C30 178 31 187 30 197 Z"
+            fill="rgba(16,185,129,0.55)" stroke="#059669" strokeWidth="1.3"
+          />
+        )}
         {hasMetatarsalPad && (
           <path d="M27 83 C27 79 73 79 73 83 C73 87 27 87 27 83 Z" fill="rgba(245,158,11,0.8)" stroke="#d97706" strokeWidth="1.5"/>
         )}
@@ -826,6 +835,20 @@ function InsoleDiagram({ rx, form }) {
             <text x={(wSX+hX)/2} y={(wedgeTopY+iTopY)/2+3} textAnchor="middle" fontSize="7" fill={wedgeTextColor} fontWeight="bold">Cuña {cunaRearfootText}</text>
           </>
         )}
+        {skiveMm > 0 && (() => {
+          /* Kirby Medial Heel Skive: bevel on plantar-medial surface of heel cup */
+          const skiveH = skiveMm * PX_MM * 0.7;
+          const sX1 = hX - 38, sX2 = hX;
+          return (
+            <>
+              <path
+                d={`M ${sX1},${iBotY} L ${sX2},${iBotY} L ${sX2},${iBotY + skiveH} Z`}
+                fill="rgba(16,185,129,0.55)" stroke="#059669" strokeWidth="1.3"
+              />
+              <text x={sX2 - 10} y={iBotY + skiveH + 8} textAnchor="middle" fontSize="6.5" fill="#059669" fontWeight="bold">Kirby {skiveMm}mm*</text>
+            </>
+          );
+        })()}
         {alzaH > 0 && (
           <text x={hX} y={alzaTopY-4} textAnchor="middle" fontSize="7" fill="#b45309" fontWeight="bold">+{liftVal}mm alza</text>
         )}
@@ -940,7 +963,18 @@ function InsoleDiagram({ rx, form }) {
             {"Alza de talón (+" + rx.alzaTalon.valor + "mm)"}
           </span>
         )}
+        {hasSkive && (
+          <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
+            <span style={{ display:"inline-block", width:14, height:10, background:"rgba(16,185,129,0.5)", border:"1px solid #059669", borderRadius:2 }}></span>
+            {`Kirby Medial Heel Skive (${skiveMm}mm) *opcional`}
+          </span>
+        )}
       </div>
+      {hasSkive && (
+        <p style={{ fontSize:"0.72rem", color:"var(--text-muted)", marginTop:"0.4rem", fontStyle:"italic" }}>
+          * Kirby Medial Heel Skive: técnica de fresado avanzada que requiere fresadora ortopédica. Opcional — puede omitirse sin afectar la indicación principal.
+        </p>
+      )}
 
       {form && (
         <div className="print-only signature-block" style={{ marginTop:"3rem" }}>
