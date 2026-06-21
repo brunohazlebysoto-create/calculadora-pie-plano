@@ -33,10 +33,11 @@ export default function App() {
     talla: "",
     edad: "",
     grado: GRADES.LEVE,
+    peso: "normal",
     sintomas: true,
     flexible: true,
+    dolorMetatarsal: false,
     testColeman: "positivo",
-    barraRetrocapital: false,
     dismetriaActiva: false,
     dismetriaPie: "izquierdo",
     dismetriaValor: "5",
@@ -78,10 +79,11 @@ export default function App() {
       tipoPie: form.tipoPie,
       talla, edad,
       grado: form.grado,
+      peso: form.peso,
       sintomas: form.sintomas,
       flexible: form.flexible,
+      dolorMetatarsal: form.dolorMetatarsal,
       testColeman: form.testColeman,
-      barraRetrocapital: form.barraRetrocapital,
       dismetriaActiva: form.dismetriaActiva,
       dismetriaPie: form.dismetriaPie,
       dismetriaValor: parseInt(form.dismetriaValor) || 0,
@@ -197,30 +199,40 @@ export default function App() {
                 </select>
               </label>
 
+              <label>
+                Peso del Paciente
+                <select name="peso" value={form.peso} onChange={handleChange}>
+                  <option value="normal">Normal / Sobrepeso leve</option>
+                  <option value="obesidad">Obesidad (IMC ≥30) — Kirby Skive máximo</option>
+                </select>
+              </label>
+
               <fieldset>
                 <legend>Características clínicas</legend>
                 <label className="checkbox-label">
                   <input type="checkbox" name="sintomas" checked={form.sintomas} onChange={handleChange} />
                   Presenta síntomas (dolor, fatiga, limitación funcional)
                 </label>
+
                 {!isCavo && (
                   <>
                     <label className="checkbox-label">
                       <input type="checkbox" name="flexible" checked={form.flexible} onChange={handleChange} />
-                      Pie plano flexible (el arco aparece al ponerse en puntillas — Test de Jack positivo)
+                      Test de Jack positivo — Pie flexible (el arco aparece al ponerse en puntillas)
                     </label>
                     <label className="checkbox-label">
-                      <input type="checkbox" name="barraRetrocapital" checked={form.barraRetrocapital} onChange={handleChange} />
-                      Incluir barra retrocapital (descarga metatarsal)
+                      <input type="checkbox" name="dolorMetatarsal" checked={form.dolorMetatarsal} onChange={handleChange} />
+                      Dolor metatarsal / metatarsalgia central o queratosis plantar anterior
                     </label>
                   </>
                 )}
+
                 {isCavo && (
                   <label style={{ marginTop: "0.5rem" }}>
-                    Test de Coleman *
+                    Test de Coleman (Bloque) *
                     <select name="testColeman" value={form.testColeman} onChange={handleChange} style={{ marginTop: "0.25rem" }}>
-                      <option value="positivo">Positivo — Pie Flexible (deformidad reductible)</option>
-                      <option value="negativo">Negativo — Pie Rígido (deformidad fija)</option>
+                      <option value="positivo">Positivo — Retropié flexible: el talón corrige al liberar el antepié → Cuña Externa + Cut-out</option>
+                      <option value="negativo">Negativo — Retropié rígido estructurado: el talón no corrige → Cuña Interna acomodativa</option>
                     </select>
                   </label>
                 )}
@@ -322,13 +334,15 @@ export default function App() {
 
                   <div className="rx-grid">
                     <RxItem label="Tipo de Ortesis" value={result.tipo} highlight={true} />
-                    <RxItem label="Soporte de Arco" value={result.arcoSoporte} />
-                    <RxItem label="Cuña Retropié" value={result.cunaRearfoot} />
-                    {!isCavo && <RxItem label="Cuña Antepié" value={result.cunaForefoot} />}
-                    {!isCavo && <RxItem label="Flanco Medial" value={result.flandeMedal} />}
-                    <RxItem label="Barra Retrocapital" value={result.barraRetrocapitalMm > 0 ? result.barraRetrocapitalMm + " mm" : "No"} />
-                    {isCavo && <RxItem label="Cut-Out 1er Radio" value={result.cutOut ? "Sí (bajo 1er metatarsiano)" : "No"} />}
-                    <RxItem label="Material" value={result.material} className="print-hide" />
+                    <RxItem label={isCavo ? "Arco Lateral (mm)" : "Arco Medial (mm)"} value={result.arcoSoporte} />
+                    {!isCavo && result.skiveKirbyMm > 0 && <RxItem label="Kirby Skive Medial" value={`${result.skiveKirbyMm} mm`} />}
+                    <RxItem label="Cuña Retropié" value={result.cunaRearfoot !== "0" ? `${result.cunaRearfoot} (${result.cunaRearfootTipo})` : "No"} />
+                    {!isCavo && <RxItem label="Flanco Medial" value={result.flancoMedial} />}
+                    <RxItem label="Barra Retrocapital" value={result.barraRetrocapitalMm > 0 ? `${result.barraRetrocapitalMm} mm` : "No"} />
+                    {isCavo && <RxItem label="Cut-Out 1er Radio" value={result.cutOut ? "Sí — bajo 1er metatarsiano (Poron 3mm)" : "No"} />}
+                    <RxItem label="Copa de Talón" value={result.copaTalon} />
+                    <RxItem label="Material Base" value={result.material} className="print-hide" />
+                    <RxItem label="Forro Superior" value={result.materialForro} className="print-hide" />
                     <RxItem label="Longitud" value={result.longitud} className="print-hide" />
                     <RxItem label="Controles" value={result.controles} className="print-hide" />
                   </div>

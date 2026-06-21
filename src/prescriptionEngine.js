@@ -1,5 +1,6 @@
-// Motor de Prescripción Paramétrico — Versión Final Unificada
-// Basado en: Delphi Consensus (PMC4282733) · PTTD Staging · CART Decision Tree (PMC9566258) · Cochrane Pediatric (PMC9561439)
+// Motor de Prescripción Ortopédica V2.0
+// Basado en: Delphi Consensus (PMC4282733) · PTTD Staging · CART Decision Tree (PMC9566258)
+// Cochrane Pediatric (PMC9561439) · Kirby Skive Technique · Coleman Block Test
 
 export const GRADES = {
   LEVE: "leve",
@@ -7,455 +8,324 @@ export const GRADES = {
   SEVERO: "severo",
 };
 
-export const AGE_GROUP = {
-  MENOR_4: "menor_4",
-  ESCOLAR_TEMPRANO: "escolar_temprano", // 4–7
-  ESCOLAR_TARDIO: "escolar_tardio",     // 8–11
-  JUVENIL_ADULTO: "juvenil_adulto",     // 12+
-};
-
-function getAgeGroup(age) {
-  if (age < 2) return null;
-  if (age < 4) return AGE_GROUP.MENOR_4;
-  if (age < 8) return AGE_GROUP.ESCOLAR_TEMPRANO;
-  if (age < 12) return AGE_GROUP.ESCOLAR_TARDIO;
-  return AGE_GROUP.JUVENIL_ADULTO;
-}
-
-// Calcula la altura de la barra retrocapital según protocolo:
-// - Edad < 8 → 0 mm siempre (bloqueado, interferencia con desarrollo del antepié)
-// - Edad ≥ 8 y talla < 41 → 3 mm (EVA Shore 30)
-// - Edad ≥ 8 y talla ≥ 41 → 4 mm leve/moderado, 5 mm severo (EVA densidad media)
-// Retorna { mm: number, bloqueado: boolean, razon: string }
-function calcBarraRetrocapital(barraRetrocapitalSolicitada, edad, talla, grado) {
-  if (!barraRetrocapitalSolicitada) {
-    return { mm: 0, bloqueado: false, razon: "" };
-  }
-  if (edad < 8) {
-    return {
-      mm: 0,
-      bloqueado: true,
-      razon: "Barra retrocapital no indicada en menores de 8 años: el antepié dinámico y elástico no debe ser bloqueado pasivamente. Se omite aunque fue solicitada.",
-    };
-  }
-  if (talla >= 41) {
-    const mm = grado === GRADES.SEVERO ? 5 : 4;
-    return {
-      mm,
-      bloqueado: false,
-      razon: `Barra retrocapital ${mm} mm (talla ≥ 41): EVA densidad media o Poron técnico, proximal a cabezas 2ª–4ª metatarsianas.`,
-    };
-  }
+// ── Valores por defecto del payload de salida ──
+function defaultRx() {
   return {
-    mm: 3,
-    bloqueado: false,
-    razon: "Barra retrocapital 3 mm (talla < 41): EVA blando Shore 30, inmediatamente proximal a cabezas metatarsianas 2ª–4ª.",
+    tipoPie: null,
+    indicacion: true,
+    tipo: "",
+    diagnostico_final: "",
+    arcoSoporte: "0mm",
+    skiveKirbyMm: 0,
+    cunaRearfoot: "0",
+    cunaRearfootTipo: "Ninguna",
+    cunaForefoot: "0",
+    flancoMedial: "Estándar",
+    barraRetrocapitalMm: 0,
+    barraRetrocapitalPosicion: "",
+    cutOut: false,
+    copaTalon: "Estándar",
+    material: "",
+    materialForro: "EVA Confort",
+    alerta: null,
+    derivacion: false,
+    longitud: "Longitud completa",
+    controles: "Control a los 3 meses",
+    notas: [],
+    fundamentacion: [],
+    alzaTalon: null,
   };
 }
 
 // ══════════════════════════════════════════════════════════════════
-// MÓDULO B — PIE CAVO
+// MÓDULO A — PIE PLANO (Pes Planovalgus)
 // ══════════════════════════════════════════════════════════════════
 
-function calcCavo(grado, edad, talla, testColeman) {
-  // Filtro 0: Alerta Neurológica
-  if (edad < 4) {
-    return {
-      tipoPie: "cavo",
-      indicacion: false,
-      alerta: "ALERTA NEUROLÓGICA. Pie cavo en menores de 4 años requiere derivación a Neurología Infantil.",
-      mensaje: "ALERTA NEUROLÓGICA. Pie cavo en menores de 4 años requiere derivación a Neurología Infantil.",
-    };
+function calcPlano({ grado, edad, talla, peso, sintomas, flexible, dolorMetatarsal, dismetriaActiva, dismetriaPie, dismetriaValor }) {
+  const rx = defaultRx();
+  rx.tipoPie = "plano";
+
+  // Dismetría
+  rx.alzaTalon = dismetriaActiva ? { pie: dismetriaPie, valor: dismetriaValor } : null;
+  if (dismetriaActiva) {
+    rx.notas.push(`Dismetría: alza de talón ${dismetriaValor} mm en pie ${dismetriaPie}.`);
   }
 
-  // Filtro 1: Tipo de cuña según Test de Coleman
-  const tipoCuna = testColeman === "positivo" ? "EXTERNA" : "INTERNA";
+  // ── Paso A.0: Filtro de Rigidez Estructural ──
+  if (!flexible) {
+    rx.tipo = "Plantilla Acomodativa Pura (Pie Plano Rígido)";
+    rx.diagnostico_final = `Pie plano rígido ${grado} — Test de Jack negativo`;
+    rx.arcoSoporte = "10mm";
+    rx.skiveKirbyMm = 0;
+    rx.cunaRearfoot = "0";
+    rx.cunaRearfootTipo = "Ninguna";
+    rx.barraRetrocapitalMm = 0;
+    rx.material = "EVA Blando (Shore 30) de acomodación pasiva pura";
+    rx.materialForro = "Poron 3.0mm de celda abierta";
+    rx.alerta = "SOPORTE PLANTAR ACOMODATIVO. El paciente presenta Pie Plano Rígido. Derivar urgentemente a Traumatología para estudio imagenológico por sospecha de coalición tarsiana o astrágalo vertical.";
+    rx.derivacion = true;
+    rx.controles = "Control a los 6 meses";
+    rx.notas.push(
+      "Pie plano rígido: plantilla estrictamente acomodativa. Corrección activa contraindicada.",
+      "Derivación prioritaria a Traumatología para descarte de coalición tarsal."
+    );
+    rx.fundamentacion.push("PTTD Stage III / Rigid flatfoot: accommodative orthosis only (Michigan Foot Doctors)", "Delphi Consensus (PMC4282733)");
+    return rx;
+  }
 
-  let arcoMm, barraMm, cutOut, material, cunaFlexibleMm, cunaRigidoMm;
+  // ── Paso A.1: Barra Retrocapital ──
+  if (dolorMetatarsal && edad >= 8) {
+    rx.barraRetrocapitalPosicion = "Instalar de forma oblicua, con su margen anterior exactamente a 5–10 mm proximal a las cabezas metatarsales 2, 3 y 4.";
+    if (talla < 41) {
+      rx.barraRetrocapitalMm = 3.0;
+      rx.notas.push("Barra retrocapital 3.0mm (talla <41): PPT o EVA blanda proximal a cabezas 2ª–4ª metatarsianas.");
+    } else {
+      rx.barraRetrocapitalMm = 4.5;
+      rx.notas.push("Barra retrocapital 4.5mm (talla ≥41): Myolite o PPT alta densidad para evitar colapso por carga.");
+    }
+  }
 
-  // Filtro 2: Talla ≥ 41
-  if (talla >= 41) {
+  // ── Paso A.2: Kirby Medial Heel Skive ──
+  const esForzado = peso === "obesidad";
+  if (grado === GRADES.LEVE) {
+    rx.skiveKirbyMm = 2;
+    rx.notas.push("Kirby Skive medial 2mm: efecto cinético inicial suave en el talón medial.");
+  } else if (grado === GRADES.MODERADO) {
+    rx.skiveKirbyMm = 4;
+    rx.notas.push("Kirby Skive medial 4mm: incremento ~15% en presión del retropié medial.");
+  } else if (grado === GRADES.SEVERO || esForzado) {
+    rx.skiveKirbyMm = 6;
+    rx.notas.push("Kirby Skive medial 6mm: incremento ~29% en presión del retropié medial — bloquea hiperpronación severa.");
+  }
+
+  // ── Paso A.3: Matriz de decisiones por edad/talla ──
+
+  // Sub-ruta A.3.1: Menores de 6 años — Fase Fisiológica
+  if (edad < 6) {
+    if (!sintomas) {
+      rx.indicacion = false;
+      rx.alerta = "PIE PLANO FISIOLÓGICO ASINTOMÁTICO. No se prescribe órtesis. El arco plantar se desarrollará naturalmente. Recomendar marcha descalza sobre terrenos irregulares y calzado flexible sin soporte de arco.";
+      return rx;
+    }
+    // Sintomático < 6 años
+    rx.tipo = `Plantilla de confort pediátrico (< 6 años · ${grado})`;
+    rx.diagnostico_final = `Pie plano ${grado} sintomático, edad < 6 años`;
+    rx.arcoSoporte = "8mm";
+    rx.cunaRearfoot = "1 mm";
+    rx.cunaRearfootTipo = "INTERNA";
+    rx.material = "EVA Monodensidad muy blando (Shore 25–30) para priorizar la propiocepción activa";
+    rx.materialForro = "Microfibra suave perforada";
+    rx.fundamentacion.push("Cochrane: órtesis blandas de confort en < 6 años sintomáticos (PMC9561439)");
+    return rx;
+  }
+
+  // Sub-ruta A.3.2: Talla < 41 Y edad ≥ 6
+  if (talla < 41 && !esForzado) {
     if (grado === GRADES.LEVE) {
-      arcoMm = 18; barraMm = 4; cutOut = false;
-      material = "Resina flexible + Poron 3mm";
-      cunaFlexibleMm = 3; cunaRigidoMm = 0;
+      rx.tipo = `Plantilla correctora EVA Doble Densidad (Talla <41 · Leve)`;
+      rx.diagnostico_final = `Pie plano leve, talla <41, edad ${edad} años`;
+      rx.arcoSoporte = "12mm";
+      rx.cunaRearfoot = "3 mm";
+      rx.cunaRearfootTipo = "INTERNA";
+      rx.material = "EVA Doble Densidad (Base firme Shore 45 / Superficie blanda Shore 25)";
+      rx.materialForro = "Microfibra perforada";
     } else if (grado === GRADES.MODERADO) {
-      arcoMm = 22; barraMm = 5; cutOut = true;
-      material = "Resina flexible + Poron";
-      cunaFlexibleMm = 4; cunaRigidoMm = 2;
+      rx.tipo = `Plantilla correctora semirígida (Talla <41 · Moderado)`;
+      rx.diagnostico_final = `Pie plano moderado, talla <41, edad ${edad} años`;
+      rx.arcoSoporte = "15mm";
+      rx.cunaRearfoot = "4 mm";
+      rx.cunaRearfootTipo = "INTERNA";
+      rx.material = "EVA Doble Densidad (Base Shore 50) o Resina termoplástica flexible 1.5mm";
+      rx.materialForro = "Poron 3.0mm";
     } else {
-      arcoMm = 26; barraMm = 5; cutOut = true;
-      material = "EVA Shore 35 + Resina resiliencia";
-      cunaFlexibleMm = 5; cunaRigidoMm = 3;
+      rx.tipo = `Plantilla correctora rígida Copa UCBL (Talla <41 · Severo)`;
+      rx.diagnostico_final = `Pie plano severo, talla <41, edad ${edad} años`;
+      rx.arcoSoporte = "18mm";
+      rx.cunaRearfoot = "6 mm";
+      rx.cunaRearfootTipo = "INTERNA";
+      rx.copaTalon = "Profunda UCBL";
+      rx.flancoMedial = "Paredes medial y lateral altas (copa tipo UCBL)";
+      rx.material = "Nylon PA11 impreso 3D (2.25mm calibrado) o Polipropileno Homopolímero Rígido";
+      rx.materialForro = "Poron 4.0mm";
+      rx.notas.push("Copa UCBL: contención tridimensional del calcáneo y astrágalo. Evaluar PTTD.");
     }
-  } else {
-    // Filtro 3: Talla < 41, por edad
-    if (edad >= 4 && edad <= 7) {
-      barraMm = 0;
-      if (grado === GRADES.LEVE) {
-        arcoMm = 15; cutOut = false;
-        material = "EVA Shore 35";
-        cunaFlexibleMm = 2; cunaRigidoMm = 0;
-      } else if (grado === GRADES.MODERADO) {
-        arcoMm = 18; cutOut = false;
-        material = "EVA Shore 35";
-        cunaFlexibleMm = 3; cunaRigidoMm = 0;
-      } else {
-        arcoMm = 20; cutOut = true;
-        material = "EVA Shore 35";
-        cunaFlexibleMm = 4; cunaRigidoMm = 2;
-      }
-    } else if (edad >= 8 && edad <= 11) {
-      if (grado === GRADES.LEVE) {
-        arcoMm = 18; barraMm = 3; cutOut = false;
-        material = "EVA Doble Densidad (45/30)";
-        cunaFlexibleMm = 3; cunaRigidoMm = 0;
-      } else if (grado === GRADES.MODERADO) {
-        arcoMm = 20; barraMm = 4; cutOut = true;
-        material = "EVA Doble Densidad (45/30)";
-        cunaFlexibleMm = 4; cunaRigidoMm = 2;
-      } else {
-        arcoMm = 24; barraMm = 4; cutOut = true;
-        material = "EVA Doble Densidad (45/30)";
-        cunaFlexibleMm = 5; cunaRigidoMm = 3;
-      }
-    } else {
-      // edad >= 12
-      if (grado === GRADES.LEVE) {
-        arcoMm = 18; barraMm = 3; cutOut = false;
-        material = "Resina flexible + Poron 3mm";
-        cunaFlexibleMm = 3; cunaRigidoMm = 0;
-      } else if (grado === GRADES.MODERADO) {
-        arcoMm = 22; barraMm = 4; cutOut = true;
-        material = "Resina flexible + Poron 3mm";
-        cunaFlexibleMm = 4; cunaRigidoMm = 2;
-      } else {
-        arcoMm = 26; barraMm = 5; cutOut = true;
-        material = "Resina flexible + Poron 3mm";
-        cunaFlexibleMm = 5; cunaRigidoMm = 3;
-      }
-    }
+    rx.fundamentacion.push("CART Decision Tree: soporte por grado en talla pediátrica (PMC9566258)", "Delphi Consensus: cuña de retropié varo calibrada al grado (PMC4282733)");
+    return rx;
   }
 
-  // Determinar cuña según flexibilidad (Coleman)
-  let cunaRearfootStr;
-  if (tipoCuna === "EXTERNA") {
-    cunaRearfootStr = cunaFlexibleMm > 0 ? `${cunaFlexibleMm} mm Ext` : "0";
+  // Sub-ruta A.3.3: Talla ≥ 41 O peso obesidad
+  if (grado === GRADES.LEVE) {
+    rx.tipo = `Plantilla correctora polipropileno (Talla ≥41 · Leve)`;
+    rx.diagnostico_final = `Pie plano leve, talla ≥41${esForzado ? " / obesidad" : ""}`;
+    rx.arcoSoporte = "15mm";
+    rx.cunaRearfoot = "5 mm";
+    rx.cunaRearfootTipo = "INTERNA";
+    rx.material = "Polipropileno 3.0mm o Nylon PA11 impreso 3D con flexión reactiva";
+    rx.materialForro = "Poron 3.0mm";
+  } else if (grado === GRADES.MODERADO) {
+    rx.tipo = `Plantilla correctora Nylon PA11 (Talla ≥41 · Moderado)`;
+    rx.diagnostico_final = `Pie plano moderado, talla ≥41${esForzado ? " / obesidad" : ""}`;
+    rx.arcoSoporte = "18mm";
+    rx.cunaRearfoot = "6 mm";
+    rx.cunaRearfootTipo = "INTERNA";
+    rx.material = "Nylon PA11 calibrado 3.0mm o Polipropileno 4.0mm";
+    rx.materialForro = "Poron 4.0mm";
   } else {
-    cunaRearfootStr = cunaRigidoMm > 0 ? `${cunaRigidoMm} mm Int` : "0";
+    rx.tipo = `Plantilla Copa UCBL rígida (Talla ≥41 · Severo)`;
+    rx.diagnostico_final = `Pie plano severo, talla ≥41${esForzado ? " / obesidad" : ""}`;
+    rx.arcoSoporte = "18mm";
+    rx.cunaRearfoot = "6 mm";
+    rx.cunaRearfootTipo = "INTERNA";
+    rx.copaTalon = "Profunda UCBL";
+    rx.flancoMedial = "Paredes medial y lateral altas (UCBL)";
+    rx.material = "Polipropileno rígido 5.0mm o Composito de Fibra de Carbono de alto rebote";
+    rx.materialForro = "Poron 4.0mm bicapa";
+    rx.notas.push("Máxima corrección. Copa UCBL con paredes altas para control total del retropié valgo severo.");
+  }
+  rx.fundamentacion.push(
+    "Escalamiento biomecánico: talla ≥41 requiere mayor flecha de arco y cuña para mantener la palanca correctora.",
+    "Delphi Consensus (PMC4282733)"
+  );
+  return rx;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MÓDULO B — PIE CAVO (Pes Cavovarus)
+// ══════════════════════════════════════════════════════════════════
+
+function calcCavo({ grado, edad, talla, testColeman }) {
+  const rx = defaultRx();
+  rx.tipoPie = "cavo";
+  rx.cunaForefoot = "N/A";
+  rx.flancoMedial = "N/A";
+
+  // Paso B.0: Filtro Neurológico
+  if (edad < 4) {
+    rx.indicacion = false;
+    rx.alerta = "ALERTA SÍNDROME NEUROMUSCULAR. El pie cavo verdadero en menores de 4 años posee un 67% de correlación con neuropatías (ej. Charcot-Marie-Tooth) o disrafismos espinales. Derivación obligatoria y urgente a Neurología y Traumatología Infantil. Contraindicadas órtesis correctoras rígidas.";
+    rx.derivacion = true;
+    return rx;
+  }
+
+  const flexible = testColeman === "positivo";
+
+  // Paso B.1: Cinemática del retropié (Coleman)
+  if (flexible) {
+    rx.cutOut = true;
+    rx.cunaRearfootTipo = "EXTERNA";
+    rx.notas.push(
+      "Coleman +: Retropié flexible. Cut-out bajo 1er radio: corte ovalado en placa rígida rellenado con Poron blando 3mm para liberar descenso de 1ª cabeza metatarsiana y desactivar vector de varo.",
+      "Cuña EXTERNA: valgizante lateral 5°–10° para expandir base de sustentación y disipar cargas de columna lateral."
+    );
+  } else {
+    rx.cutOut = false;
+    rx.cunaRearfootTipo = "INTERNA";
+    rx.notas.push(
+      "Coleman −: Retropié rígido estructurado. Sin cut-out (no existe movilidad articular en el complejo tarsal).",
+      "Cuña INTERNA: acomodativa de contacto total para rellenar el vacío anatómico y disipar presiones."
+    );
+  }
+
+  // Paso B.2: Barra Retrocapital (cavo)
+  if (edad >= 8 && (grado === GRADES.MODERADO || grado === GRADES.SEVERO)) {
+    rx.barraRetrocapitalPosicion = "Margen anterior oblicuo exactamente a 5mm proximal a cabezas metatarsales. Prohibida su colocación directa debajo de la articulación.";
+    if (talla < 41) {
+      rx.barraRetrocapitalMm = 3.0;
+      rx.notas.push("Barra retrocapital 3.0mm (talla <41): Poron o PPT Shore 40.");
+    } else {
+      rx.barraRetrocapitalMm = 4.5;
+      rx.notas.push("Barra retrocapital 4.5mm (talla ≥41): Poron o PPT firme Shore 40.");
+    }
   }
 
   const gradoLabel = { leve: "Leve", moderado: "Moderado", severo: "Severo" }[grado];
-  const colemanLabel = testColeman === "positivo" ? "Flexible (Coleman +)" : "Rígido (Coleman −)";
+  const colemanLabel = flexible ? "Flexible (Coleman +)" : "Rígido (Coleman −)";
 
-  return {
-    tipoPie: "cavo",
-    indicacion: true,
-    tipo: `Plantilla para Pie Cavo ${gradoLabel} — ${colemanLabel}`,
-    indicacion_desc: `Pie cavo ${gradoLabel.toLowerCase()} ${colemanLabel.toLowerCase()}`,
-    arcoSoporte: `${arcoMm}mm`,
-    cunaRearfoot: cunaRearfootStr,
-    cunaForefoot: "N/A",
-    flancoMedial: "N/A",
-    barraRetrocapitalMm: barraMm,
-    cutOut,
-    material,
-    alerta: null,
-    longitud: "Longitud completa",
-    controles: "Control a los 3 meses",
-    notas: [
-      `Arco lateral (soporte del arco cavo): ${arcoMm} mm.`,
-      `Cuña de retropié: ${cunaRearfootStr} (${colemanLabel}).`,
-      cutOut ? "Cut-out bajo 1er radio: descarga del primer metatarsiano." : "Sin cut-out.",
-      barraMm > 0 ? `Barra retrocapital: ${barraMm} mm.` : "Sin barra retrocapital.",
-    ],
-    fundamentacion: [
-      "Pie cavo: el soporte se aplica en el arco lateral (no medial).",
-      "Test de Coleman: cuña externa en pie flexible, interna en pie rígido.",
-      "Cut-out bajo 1er radio indicado en grado moderado y severo para descargar el primer metatarsiano.",
-    ],
-    alzaTalon: null,
-  };
+  // Paso B.3: Matriz de decisiones
+
+  // Sub-ruta B.3.1: Talla < 41 Y edad 4–11
+  if (talla < 41 && edad <= 11) {
+    if (grado === GRADES.LEVE) {
+      rx.tipo = `Plantilla cavo pediátrica blanda (${gradoLabel} · ${colemanLabel})`;
+      rx.diagnostico_final = `Pie cavo ${gradoLabel.toLowerCase()} pediátrico, talla <41`;
+      rx.arcoSoporte = "15mm";
+      rx.cunaRearfoot = flexible ? "2 mm Ext" : "0";
+      rx.material = "EVA blando Monodensidad (Shore 30–35)";
+      rx.materialForro = "Poron 3.0mm de celda abierta para amortiguación profunda";
+    } else if (grado === GRADES.MODERADO) {
+      rx.tipo = `Plantilla cavo pediátrica media (${gradoLabel} · ${colemanLabel})`;
+      rx.diagnostico_final = `Pie cavo ${gradoLabel.toLowerCase()} pediátrico, talla <41`;
+      rx.arcoSoporte = "18mm";
+      rx.cunaRearfoot = flexible ? "3 mm Ext" : "0";
+      rx.material = "EVA densidad media (Shore 40) para soporte elástico";
+      rx.materialForro = "PPT / Poron 3.0mm";
+    } else {
+      rx.tipo = `Plantilla cavo pediátrica reforzada (${gradoLabel} · ${colemanLabel})`;
+      rx.diagnostico_final = `Pie cavo ${gradoLabel.toLowerCase()} pediátrico, talla <41`;
+      rx.arcoSoporte = "20mm";
+      rx.cunaRearfoot = flexible ? "4 mm Ext" : "2 mm Int";
+      rx.material = "EVA Doble Densidad con base dura y superficie viscoelástica";
+      rx.materialForro = "Poron / PPT 4.0mm de espesor total";
+    }
+    rx.fundamentacion.push("Pie cavo pediátrico: soporte arco lateral + cuña según Coleman (PMC9566258)");
+    return rx;
+  }
+
+  // Sub-ruta B.3.2: Talla ≥ 41 O edad ≥ 12
+  if (grado === GRADES.LEVE) {
+    rx.tipo = `Plantilla cavo adulto resina flexible (${gradoLabel} · ${colemanLabel})`;
+    rx.diagnostico_final = `Pie cavo ${gradoLabel.toLowerCase()}, talla ≥41`;
+    rx.arcoSoporte = "18mm";
+    rx.cunaRearfoot = flexible ? "3 mm Ext" : "0";
+    rx.material = "Resina Flexible termomoldeable (Flux) o Nylon PA11 de alta flexibilidad";
+    rx.materialForro = "PPT / Poron 3.0mm";
+  } else if (grado === GRADES.MODERADO) {
+    rx.tipo = `Plantilla cavo adulto EVA alta densidad (${gradoLabel} · ${colemanLabel})`;
+    rx.diagnostico_final = `Pie cavo ${gradoLabel.toLowerCase()}, talla ≥41`;
+    rx.arcoSoporte = "22mm";
+    rx.cunaRearfoot = flexible ? "4 mm Ext" : "2 mm Int";
+    rx.material = "EVA Alta Densidad (Shore 45–50) o Resina con espesor controlado para flexión dinámica";
+    rx.materialForro = "Poron técnico 4.0mm";
+  } else {
+    rx.tipo = `Plantilla cavo adulto Nylon PA11 3D (${gradoLabel} · ${colemanLabel})`;
+    rx.diagnostico_final = `Pie cavo ${gradoLabel.toLowerCase()} adulto — escaneo 3D requerido`;
+    rx.arcoSoporte = "26mm";
+    rx.cunaRearfoot = flexible ? "5 mm Ext" : "3 mm Int";
+    rx.material = "Base técnica mixta: Nylon PA11 impreso 3D (reproducción micrométrica de la bóveda) + cuñas de EVA alemana alta amortiguación";
+    rx.materialForro = "PPT o Poron 6.0mm Bicapa anterior (absorción de picos de carga ≤315 N/cm²)";
+    rx.notas.push("Severo: exige toma de molde o escaneo 3D estricto de contacto total.");
+  }
+  rx.fundamentacion.push("Pie cavo adulto: arco lateral + Coleman + Barra Retrocapital según grado (PMC9566258)");
+  return rx;
 }
 
 // ══════════════════════════════════════════════════════════════════
 // API PÚBLICA
 // ══════════════════════════════════════════════════════════════════
 
-export function generatePrescription({ tipoPie = "plano", talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor, barraRetrocapital, testColeman }) {
-  // Routing por tipo de pie
+export function generatePrescription({ tipoPie = "plano", talla, edad, grado, peso = "normal", sintomas, flexible, dolorMetatarsal, testColeman, barraRetrocapital, dismetriaActiva, dismetriaPie, dismetriaValor }) {
+  if (!talla || !edad) return { error: "Talla y edad son requeridas." };
+  if (edad < 1 || edad > 120) return { error: "Edad fuera de rango (1–120)." };
+  if (talla < 15 || talla > 50) return { error: "Talla fuera de rango (15–50 EU)." };
+
   if (tipoPie === "cavo") {
-    return calcCavo(grado, edad, talla, testColeman);
+    return calcCavo({ grado, edad, talla, testColeman });
   }
 
-  // ── PIE PLANO (lógica original intacta) ──
-  if (edad < 2) {
-    return { error: "Edad mínima para prescripción: 2 años." };
-  }
+  // Pie Plano
+  if (edad < 2) return { error: "Edad mínima para prescripción: 2 años." };
 
-  // Menor de 4 años asintomático y sin dismetría → no indicar
-  if (edad < 4 && !sintomas && !dismetriaActiva) {
-    return {
-      indicacion: false,
-      mensaje: "No se indican plantillas en menores de 4 años asintomáticos (pie plano fisiológico en desarrollo).",
-      recomendaciones: [
-        "Estimular marcha descalza en superficies naturales (arena, pasto).",
-        "Evitar calzado con suela rígida o soporte de arco prefabricado.",
-        "Control anual para evaluar el desarrollo del arco plantar.",
-      ],
-    };
-  }
+  // dolorMetatarsal: si no se provee explícitamente, usar barraRetrocapital (compatibilidad)
+  const dm = dolorMetatarsal !== undefined ? dolorMetatarsal : !!barraRetrocapital;
 
-  const rx = buildRx({ talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor, barraRetrocapital });
-
-  if (!rx.indicacion) {
-    return {
-      indicacion: false,
-      mensaje: "No se indican plantillas en menores de 4 años asintomáticos (pie plano fisiológico en desarrollo).",
-      recomendaciones: [
-        "Estimular marcha descalza en superficies naturales (arena, pasto).",
-        "Evitar calzado con suela rígida o soporte de arco prefabricado.",
-        "Control anual para evaluar el desarrollo del arco plantar.",
-      ],
-    };
-  }
-
-  return rx;
-}
-
-function buildRx({ talla, edad, grado, sintomas, flexible, dismetriaActiva, dismetriaPie, dismetriaValor, barraRetrocapital }) {
-  const barra = calcBarraRetrocapital(barraRetrocapital, edad, talla, grado);
-
-  const rx = {
-    tipoPie: "plano",
-    indicacion: true,
-    tipo: "",
-    arcoSoporte: "",
-    cunaRearfoot: "",
-    cunaForefoot: "0 mm",
-    flandeMedal: "",
-    barraRetrocapitalMm: barra.mm,  // 0 = sin barra
-    material: "",
-    longitud: "Longitud completa",
-    notas: [],
-    controles: "Control a los 3 meses",
-    fundamentacion: [],
-    alzaTalon: dismetriaActiva ? { pie: dismetriaPie, valor: dismetriaValor } : null,
-  };
-
-  // Dismetría
-  if (dismetriaActiva) {
-    rx.notas.push(`Dismetría de extremidades: alza de talón de ${dismetriaValor} mm en la plantilla del pie ${dismetriaPie === "izquierdo" ? "izquierdo" : "derecho"}.`);
-  }
-
-  // Aviso si la barra fue solicitada pero bloqueada
-  if (barra.bloqueado) {
-    rx.notas.push(`⚠️ ${barra.razon}`);
-  } else if (barra.mm > 0) {
-    rx.notas.push(barra.razon);
-  }
-
-  // ── FILTRO 0: Pie plano RÍGIDO ──
-  // Test de Jack (-): sin arco en puntillas → solo acomodativa, derivar
-  if (!flexible) {
-    rx.tipo = "Plantilla acomodativa (pie plano rígido)";
-    rx.arcoSoporte = "10 mm";
-    rx.cunaRearfoot = "0 mm";
-    rx.cunaForefoot = "0 mm";
-    rx.flandeMedal = "Contención medial y lateral alta";
-    rx.material = "EVA blando con cubierta de neopreno";
-    rx.barraRetrocapitalMm = 0; // contraindicada en pie rígido salvo evaluación individual
-    rx.notas.push(
-      "Pie plano rígido: plantilla estrictamente acomodativa. Corrección activa contraindicada (riesgo de cizallamiento en tarso bloqueado).",
-      "Derivación prioritaria a Traumatología para estudio de coalición tarsal o astrágalo vertical congénito."
-    );
-    rx.controles = "Control a los 6 meses";
-    rx.fundamentacion.push(
-      "PTTD Stage III / Rigid flatfoot: accommodative orthosis only (Michigan Foot Doctors)",
-      "Delphi Consensus: corrective posting contraindicado en pie rígido (PMC4282733)"
-    );
-    return rx;
-  }
-
-  // ── REGLA 1: Talla ≥ 41 (predomina sobre la edad) ──
-  if (talla >= 41) {
-    if (grado === GRADES.LEVE) {
-      rx.tipo = "Plantilla correctora semirígida (Talla ≥ 41 · Grado Leve)";
-      rx.arcoSoporte = "15 mm";
-      rx.cunaRearfoot = "5 mm";
-      rx.flandeMedal = "Medial estándar";
-      rx.material = "Polipropileno + cubierta suave amortiguadora";
-      rx.notas.push("Talla ≥ 41 grado leve: arco 15 mm / cuña 5 mm. Relación 1:3 respetada.");
-    } else if (grado === GRADES.MODERADO) {
-      rx.tipo = "Plantilla correctora firme (Talla ≥ 41 · Grado Moderado)";
-      rx.arcoSoporte = "18 mm";
-      rx.cunaRearfoot = "6 mm";
-      rx.flandeMedal = "Medial y lateral elevados";
-      rx.material = "Polipropileno + cubierta suave amortiguadora";
-      rx.notas.push("Talla ≥ 41 grado moderado: arco 18 mm / cuña 6 mm. Relación 1:3 respetada.");
-    } else {
-      rx.tipo = "Plantilla Copa UCBL (Talla ≥ 41 · Grado Severo)";
-      rx.arcoSoporte = "18 mm";
-      rx.cunaRearfoot = "6 mm";
-      rx.flandeMedal = "Paredes medial y lateral altas (copa tipo UCBL)";
-      rx.material = "Polipropileno rígido + Copa UCBL";
-      rx.notas.push(
-        "Talla ≥ 41 grado severo: máxima corrección. Copa UCBL con paredes altas para control total del retropié.",
-        "Considerar evaluación de PTTD (disfunción del tibial posterior)."
-      );
-    }
-    rx.fundamentacion.push(
-      "Escalamiento biomecánico: talla ≥ 41 requiere mayor flecha de arco y cuña para mantener la palanca correctora.",
-      "Delphi Consensus: posteo retropié varo y soporte longitudinal en adultos (PMC4282733)."
-    );
-    return rx;
-  }
-
-  // ── REGLA 2: Talla < 41, estratificado por grupo etario y grado ──
-  const ageGroup = getAgeGroup(edad);
-
-  // Grupo A: Menores de 4 años (solo si sintomático o dismetría)
-  if (ageGroup === AGE_GROUP.MENOR_4) {
-    if (sintomas || dismetriaActiva) {
-      if (grado === GRADES.LEVE) {
-        rx.tipo = "Plantilla de confort mínimo (< 4 años · Grado Leve)";
-        rx.arcoSoporte = "6 mm";
-        rx.cunaRearfoot = "1 mm";
-        rx.flandeMedal = "Mínimo";
-        rx.material = "EVA blando Shore 25";
-        rx.notas.push("< 4 años grado leve: confort suave. Objetivo: comodidad, no corrección activa.");
-      } else if (grado === GRADES.MODERADO) {
-        rx.tipo = "Plantilla de confort leve (< 4 años · Grado Moderado)";
-        rx.arcoSoporte = "8 mm";
-        rx.cunaRearfoot = "2 mm";
-        rx.flandeMedal = "Mínimo";
-        rx.material = "EVA blando Shore 30";
-        rx.notas.push("< 4 años grado moderado: arco 8 mm / cuña 2 mm. No interferir con el desarrollo fisiológico.");
-      } else {
-        rx.tipo = "Plantilla de confort moderado (< 4 años · Grado Severo)";
-        rx.arcoSoporte = "10 mm";
-        rx.cunaRearfoot = "3 mm";
-        rx.flandeMedal = "Bajo con contención lateral";
-        rx.material = "EVA doble densidad";
-        rx.notas.push("< 4 años grado severo: soporte aumentado pero blando. Cuña 3 mm para reducir el valgo del calcáneo sin forzar el desarrollo óseo.");
-      }
-      rx.fundamentacion.push(
-        "Cochrane: desaconseja plantillas rígidas correctivas en < 4 años.",
-        "Ortesis blandas de confort indicadas ante sintomatología evidente (PMC9561439)."
-      );
-    } else {
-      rx.indicacion = false;
-    }
-    return rx;
-  }
-
-  // Grupo B: 4–7 años (ventana de desarrollo activo — barra bloqueada)
-  if (ageGroup === AGE_GROUP.ESCOLAR_TEMPRANO) {
-    if (grado === GRADES.LEVE) {
-      rx.tipo = "Plantilla correctora pediátrica suave (4–8 años · Grado Leve)";
-      rx.arcoSoporte = "10 mm";
-      rx.cunaRearfoot = "3 mm";
-      rx.flandeMedal = "Bajo";
-      rx.material = "EVA doble densidad";
-      rx.notas.push("4–8 años grado leve: arco 10 mm / cuña 3 mm. Relación 1:3. Estimulación sin sobrecorrección.");
-    } else if (grado === GRADES.MODERADO) {
-      rx.tipo = "Plantilla correctora pediátrica estándar (4–8 años · Grado Moderado)";
-      rx.arcoSoporte = "12 mm";
-      rx.cunaRearfoot = "4 mm";
-      rx.flandeMedal = "Estándar";
-      rx.material = "EVA doble densidad";
-      rx.notas.push("4–8 años grado moderado: arco 12 mm / cuña 4 mm. Relación 1:3. Favorece el desarrollo del arco longitudinal medial.");
-    } else {
-      rx.tipo = "Plantilla correctora pediátrica reforzada (4–8 años · Grado Severo)";
-      rx.arcoSoporte = "14 mm";
-      rx.cunaRearfoot = "5 mm";
-      rx.flandeMedal = "Medial elevado con contención lateral";
-      rx.material = "EVA doble densidad + base semirígida de refuerzo";
-      rx.notas.push(
-        "4–8 años grado severo: arco 14 mm / cuña 5 mm (máximo para esta edad). Respetar la plasticidad del pie en crecimiento.",
-        "Control cada 3 meses por crecimiento activo."
-      );
-      rx.controles = "Control a los 3 meses";
-    }
-    rx.fundamentacion.push(
-      "4–8 años: cuña reduce valgo del talón y facilita el desarrollo del arco longitudinal medial.",
-      "Plantillas activas mejoran la alineación de la marcha en niños con pie plano sintomático (PMC9561439)."
-    );
-    return rx;
-  }
-
-  // Grupo C: 8–11 años (transición y maduración ósea — barra disponible según criterio)
-  if (ageGroup === AGE_GROUP.ESCOLAR_TARDIO) {
-    if (grado === GRADES.LEVE) {
-      rx.tipo = "Plantilla correctora pediátrica (8–12 años · Grado Leve)";
-      rx.arcoSoporte = "12 mm";
-      rx.cunaRearfoot = "4 mm";
-      rx.flandeMedal = "Estándar";
-      rx.material = "EVA doble densidad o resina semirígida";
-      rx.notas.push("8–12 años grado leve: arco 12 mm / cuña 4 mm. Relación 1:3.");
-    } else if (grado === GRADES.MODERADO) {
-      rx.tipo = "Plantilla correctora pediátrica (8–12 años · Grado Moderado)";
-      rx.arcoSoporte = "15 mm";
-      rx.cunaRearfoot = "5 mm";
-      rx.flandeMedal = "Medial elevado";
-      rx.material = "EVA doble densidad o resina semirígida";
-      rx.notas.push("8–12 años grado moderado: arco 15 mm / cuña 5 mm. Relación 1:3.");
-    } else {
-      rx.tipo = "Plantilla correctora rígida (8–12 años · Grado Severo)";
-      rx.arcoSoporte = "18 mm";
-      rx.cunaRearfoot = "6 mm";
-      rx.flandeMedal = "Paredes medial y lateral altas (copa tipo UCBL)";
-      rx.material = "Resina semirígida + Copa UCBL";
-      rx.notas.push(
-        "8–12 años grado severo: arco 18 mm / cuña 6 mm. Copa UCBL con paredes altas.",
-        "Control trimestral por crecimiento activo."
-      );
-      rx.controles = "Control a los 3 meses";
-    }
-    rx.fundamentacion.push(
-      "8–12 años: el pie es menos plástico. Dosificar cuña y arco según grado para evitar sobrecorrección.",
-      "Delphi Consensus: cuña de retropié varo calibrada al grado de colapso (PMC4282733)."
-    );
-    return rx;
-  }
-
-  // Grupo D: 12 años o más (talla < 41)
-  if (grado === GRADES.LEVE) {
-    rx.tipo = "Plantilla correctora semirígida (≥ 12 años · Grado Leve)";
-    rx.arcoSoporte = "12 mm";
-    rx.cunaRearfoot = "4 mm";
-    rx.flandeMedal = "Estándar";
-    rx.material = "Polipropileno + cubierta suave amortiguadora";
-    rx.notas.push("≥ 12 años grado leve: arco 12 mm / cuña 4 mm. Relación 1:3.");
-    rx.fundamentacion.push(
-      "Control de pronación leve: 12 mm + cuña 4 mm sin sobrecorregir.",
-      "CART algorithm: mild flatfoot corrective orthosis (PMC9566258)"
-    );
-  } else if (grado === GRADES.MODERADO) {
-    rx.tipo = "Plantilla correctora semirígida a medida (≥ 12 años · Grado Moderado)";
-    rx.arcoSoporte = "15 mm";
-    rx.cunaRearfoot = "5 mm";
-    rx.flandeMedal = "Medial elevado";
-    rx.material = "Polipropileno + cubierta suave amortiguadora";
-    rx.notas.push("≥ 12 años grado moderado: arco 15 mm / cuña 5 mm. Relación 1:3.");
-    rx.fundamentacion.push(
-      "Cuña 5 mm reduce valgo del calcáneo y tensión sobre el tibial posterior.",
-      "PTTD Stage I/II orthotic design guidelines (ProLab Orthotics, 2024)"
-    );
-  } else {
-    rx.tipo = "Plantilla correctora rígida a medida (≥ 12 años · Grado Severo)";
-    rx.arcoSoporte = "18 mm";
-    rx.cunaRearfoot = "6 mm";
-    rx.flandeMedal = "Paredes medial y lateral altas (control total)";
-    rx.material = "Polipropileno rígido + Copa UCBL";
-    rx.notas.push(
-      "≥ 12 años grado severo: arco 18 mm / cuña 6 mm. Copa UCBL con paredes altas para control del retropié valgo severo."
-    );
-    rx.fundamentacion.push(
-      "Copa UCBL: estándar para pie plano severo flexible.",
-      "UCBL design criteria: deep heel cup and high medial/lateral flanges (FootFoot Care, 2024)"
-    );
-  }
-
-  return rx;
+  return calcPlano({
+    grado, edad, talla,
+    peso: peso || "normal",
+    sintomas: !!sintomas,
+    flexible: flexible !== false,
+    dolorMetatarsal: dm,
+    dismetriaActiva: !!dismetriaActiva,
+    dismetriaPie: dismetriaPie || "izquierdo",
+    dismetriaValor: dismetriaValor || 0,
+  });
 }
