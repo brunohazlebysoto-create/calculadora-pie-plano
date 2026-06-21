@@ -340,7 +340,7 @@ export default function App() {
                     {!isCavo && <RxItem label="Flanco Medial" value={result.flancoMedial} />}
                     <RxItem label="Barra Retrocapital" value={result.barraRetrocapitalMm > 0 ? `${result.barraRetrocapitalMm} mm` : "No"} />
                     {isCavo && <RxItem label="Cut-Out 1er Radio" value={result.cutOut ? "Sí — bajo 1er metatarsiano (Poron 3mm)" : "No"} />}
-                    <RxItem label="Copa de Talón" value={result.copaTalon} />
+                    <RxItem label="Copa de Talón" value={result.copaProfundidadMm > 0 ? `${result.copaTalon} (${result.copaProfundidadMm}mm)` : result.copaTalon} />
                     <RxItem label="Material Base" value={result.material} className="print-hide" />
                     <RxItem label="Forro Superior" value={result.materialForro} className="print-hide" />
                     <RxItem label="Longitud" value={result.longitud} className="print-hide" />
