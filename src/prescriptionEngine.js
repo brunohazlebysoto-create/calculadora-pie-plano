@@ -173,8 +173,8 @@ function calcPlano({ grado, edad, talla, peso, sintomas, flexible, dolorMetatars
   } else {
     rx.tipo = `Plantilla Copa UCBL rígida (Talla ≥41 · Severo)`;
     rx.diagnostico_final = `Pie plano severo, talla ≥41${esForzado ? " / obesidad" : ""}`;
-    rx.arcoSoporte = "18mm";
-    rx.cunaRearfoot = "6 mm";
+    rx.arcoSoporte = "20mm";
+    rx.cunaRearfoot = "8 mm";
     rx.cunaRearfootTipo = "INTERNA";
     rx.copaTalon = "Profunda UCBL";
     rx.flancoMedial = "Paredes medial y lateral altas (UCBL)";
