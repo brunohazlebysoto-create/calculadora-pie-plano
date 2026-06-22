@@ -1,5 +1,38 @@
-export default function SeccionPadres() {
+import { useState } from "react";
+import SeccionPadresCavo from "./SeccionPadresCavo";
+
+export default function SeccionPadres({ printMode = false }) {
+  const [tipo, setTipo] = useState("plano");
+
+  const BotonesSelector = () => (
+    <div style={{ display:"flex", gap:"0.75rem", padding:"1rem 1.5rem 0", flexWrap:"wrap" }}>
+      <button
+        onClick={() => setTipo("plano")}
+        style={{ padding:"0.45rem 1.2rem", borderRadius:"999px", border:"2px solid #3b82f6", background: tipo==="plano" ? "#3b82f6" : "transparent", color: tipo==="plano" ? "#fff" : "#3b82f6", fontWeight:600, cursor:"pointer" }}
+      >Pie Plano</button>
+      <button
+        onClick={() => setTipo("cavo")}
+        style={{ padding:"0.45rem 1.2rem", borderRadius:"999px", border:"2px solid #7c3aed", background: tipo==="cavo" ? "#7c3aed" : "transparent", color: tipo==="cavo" ? "#fff" : "#7c3aed", fontWeight:600, cursor:"pointer" }}
+      >Pie Cavo</button>
+      <button
+        onClick={() => window.print()}
+        style={{ padding:"0.45rem 1.2rem", borderRadius:"999px", border:"2px solid #059669", background:"#059669", color:"#fff", fontWeight:600, cursor:"pointer", marginLeft:"auto" }}
+      >🖨 Imprimir guía {tipo === "cavo" ? "Pie Cavo" : "Pie Plano"}</button>
+    </div>
+  );
+
+  if (tipo === "cavo") {
+    return (
+      <>
+        {!printMode && <BotonesSelector />}
+        <SeccionPadresCavo />
+      </>
+    );
+  }
+
   return (
+    <>
+      {!printMode && <BotonesSelector />}
     <main className="padres-section">
       <h2>Para Padres: ¿Qué es el Pie Plano?</h2>
       <p className="padres-intro">
@@ -349,5 +382,6 @@ export default function SeccionPadres() {
         </div>
       </div>
     </main>
+    </>
   );
 }

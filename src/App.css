@@ -1114,6 +1114,52 @@ footer br {
     padding-top: 1cm;
   }
 
+  .print-guia-wrapper .padres-section {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .print-guia-wrapper .padres-section > h2,
+  .print-guia-wrapper .padres-section > .padres-intro {
+    display: none;
+  }
+  .print-guia-wrapper .padres-card {
+    break-inside: avoid;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.78rem;
+  }
+  .print-guia-wrapper .padres-card h3 {
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+  }
+  .print-guia-wrapper .chain-svg,
+  .print-guia-wrapper .chart-svg,
+  .print-guia-wrapper .plantilla-svg,
+  .print-guia-wrapper .foot-svg {
+    max-height: 80px !important;
+    width: 100% !important;
+  }
+  .print-guia-wrapper .diagrams-row {
+    gap: 0.4rem;
+  }
+  .print-guia-wrapper .semaforo-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+  .print-guia-wrapper .semaforo-card {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.72rem;
+  }
+  .print-guia-wrapper .mejoria-lista {
+    gap: 0.3rem;
+  }
+  .print-guia-wrapper .mejoria-item {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
   .print-header {
     border-bottom: 2px solid black;
     padding-bottom: 0.5rem;

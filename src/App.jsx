@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { generatePrescription, GRADES } from "./prescriptionEngine";
 import SeccionPadres from "./SeccionPadres";
+import SeccionPadresCavo from "./SeccionPadresCavo";
 import "./App.css";
 
 const REGISTRY_KEY = "plantillas_registry";
@@ -394,102 +395,8 @@ export default function App() {
                       )}
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.85rem" }}>
-                      <div className="print-card">
-                        <h3>{isCavo ? "¿Qué es el Pie Cavo?" : "¿Qué es el Pie Plano?"}</h3>
-                        <svg viewBox="0 0 200 90" style={{ width:"100%", marginBottom:"0.5rem" }}>
-                          <ellipse cx="45" cy="70" rx="30" ry="12" fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.5"/>
-                          <path d="M20 70 C22 55 30 42 38 35 C46 28 54 28 58 35 C62 42 66 55 70 70" fill="none" stroke="#3b82f6" strokeWidth="1.5"/>
-                          <path d="M20 70 C22 60 35 52 45 52 C55 52 68 60 70 70" fill="#bfdbfe" stroke="#3b82f6" strokeWidth="1" opacity="0.6"/>
-                          <text x="45" y="87" textAnchor="middle" fontSize="8" fill="#1d4ed8" fontWeight="bold">PIE NORMAL</text>
-                          <text x="45" y="22" textAnchor="middle" fontSize="7" fill="#1e3a8a">Arco elevado</text>
-                          {isCavo ? (
-                            <>
-                              <ellipse cx="155" cy="70" rx="32" ry="12" fill="#f3e8ff" stroke="#7c3aed" strokeWidth="1.5"/>
-                              <path d="M128 70 C130 55 138 40 148 32 C158 24 166 24 170 32 C174 40 178 55 180 70" fill="none" stroke="#7c3aed" strokeWidth="1.5"/>
-                              <path d="M128 70 C132 60 148 34 155 32 C162 34 178 60 180 70" fill="#ddd6fe" stroke="#7c3aed" strokeWidth="1" opacity="0.6"/>
-                              <text x="155" y="87" textAnchor="middle" fontSize="8" fill="#5b21b6" fontWeight="bold">PIE CAVO</text>
-                              <text x="155" y="22" textAnchor="middle" fontSize="7" fill="#4c1d95">Arco excesivo</text>
-                            </>
-                          ) : (
-                            <>
-                              <ellipse cx="155" cy="70" rx="32" ry="12" fill="#fee2e2" stroke="#ef4444" strokeWidth="1.5"/>
-                              <path d="M128 70 C130 60 138 50 148 44 C158 38 166 38 170 44 C174 50 178 60 180 70" fill="none" stroke="#ef4444" strokeWidth="1.5"/>
-                              <path d="M128 70 C128 68 180 68 180 70" fill="#fca5a5" stroke="#ef4444" strokeWidth="1" opacity="0.6"/>
-                              <text x="155" y="87" textAnchor="middle" fontSize="8" fill="#b91c1c" fontWeight="bold">PIE PLANO</text>
-                              <text x="155" y="22" textAnchor="middle" fontSize="7" fill="#7f1d1d">Sin arco (colapsado)</text>
-                            </>
-                          )}
-                        </svg>
-                        <p>{isCavo
-                          ? "El pie cavo presenta un arco longitudinal excesivamente elevado. Puede causar sobrecarga en el talón y la cabeza del 5° metatarsiano, dolor, callosidades y deformidad de dedos en garra."
-                          : "El pie plano ocurre cuando el arco longitudinal medial colapsa, permitiendo que toda la planta toque el suelo. En niños menores de 6 años es fisiológico y normal."
-                        }</p>
-                      </div>
-
-                      <div className="print-card">
-                        <h3>{isCavo ? "¿Qué hace la plantilla?" : "Evolución Natural del Arco"}</h3>
-                        {isCavo ? (
-                          <ul style={{ paddingLeft: "1rem", fontSize: "0.85rem" }}>
-                            <li>Soporte del arco lateral para redistribuir la carga.</li>
-                            <li>Cuña de retropié para corregir la inclinación del talón.</li>
-                            {result.cutOut && <li>Cut-out bajo el 1er metatarsiano para aliviar la presión.</li>}
-                            <li>Mejora la estabilidad y reduce el dolor.</li>
-                          </ul>
-                        ) : (
-                          <>
-                            <svg viewBox="0 0 200 90" style={{ width:"100%", marginBottom:"0.5rem" }}>
-                              <line x1="15" y1="75" x2="185" y2="75" stroke="#ccc" strokeWidth="1"/>
-                              <line x1="15" y1="75" x2="15" y2="10" stroke="#ccc" strokeWidth="1"/>
-                              <path d="M15 72 C35 72 50 70 65 62 C80 54 95 40 115 30 C135 22 155 20 185 20" fill="none" stroke="#10b981" strokeWidth="2.5"/>
-                              <text x="10" y="8" fontSize="6.5" fill="#065f46">% con arco</text>
-                              <text x="15" y="83" textAnchor="middle" fontSize="6" fill="#444">0</text>
-                              <text x="65" y="83" textAnchor="middle" fontSize="6" fill="#444">3</text>
-                              <text x="115" y="83" textAnchor="middle" fontSize="6" fill="#444">6</text>
-                              <text x="165" y="83" textAnchor="middle" fontSize="6" fill="#444">10</text>
-                              <text x="100" y="92" textAnchor="middle" fontSize="7" fill="#444">Edad (años)</text>
-                              <text x="140" y="17" fontSize="6.5" fill="#065f46">~80% mejoran</text>
-                              <text x="140" y="25" fontSize="6.5" fill="#065f46">solos antes</text>
-                              <text x="140" y="33" fontSize="6.5" fill="#065f46">de los 10 años</text>
-                            </svg>
-                            <p>La mayoría de los niños desarrollan el arco espontáneamente. Las plantillas <strong>apoyan este proceso</strong> sin reemplazarlo.</p>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="print-card">
-                        <h3>Plan de Adaptación a la Plantilla</h3>
-                        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:"0.82rem", marginTop:"0.25rem" }}>
-                          <tbody>
-                            {[["Día 1","1 – 2 horas"],["Día 2","2 – 3 horas"],["Día 3","4 – 5 horas"],["Día 4+","Uso completo"]].map(([d,h]) => (
-                              <tr key={d} style={{ borderBottom:"1px solid #e5e7eb" }}>
-                                <td style={{ padding:"0.3rem 0.5rem", fontWeight:"bold", color:"#1d4ed8" }}>{d}</td>
-                                <td style={{ padding:"0.3rem 0.5rem" }}>{h}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        <p style={{ marginTop:"0.5rem" }}><strong>Calzado:</strong> Contrafuerte firme, puntera ancha, plantilla extraíble.</p>
-                        <p style={{ marginTop:"0.25rem" }}><strong>Higiene:</strong> Limpiar con paño húmedo. No mojar ni secar con calor.</p>
-                      </div>
-
-                      <div className="print-card">
-                        <h3>Señales de Alarma — Consulte de Inmediato</h3>
-                        <svg viewBox="0 0 200 70" style={{ width:"100%", marginBottom:"0.5rem" }}>
-                          {[["#22c55e","Verde","Sin dolor al usar"], ["#eab308","Amarillo","Dolor leve 1ª sem."], ["#ef4444","Rojo","Dolor persistente"]].map(([c, n, t], i) => (
-                            <g key={n} transform={"translate(" + (i * 66 + 10) + ", 5)"}>
-                              <circle cx="28" cy="20" r="18" fill={c} opacity="0.85"/>
-                              <text x="28" y="46" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill={c}>{n}</text>
-                              <text x="28" y="56" textAnchor="middle" fontSize="5.5" fill="#333">{t}</text>
-                            </g>
-                          ))}
-                        </svg>
-                        <ul style={{ paddingLeft:"1rem", margin:"0", fontSize:"0.82rem" }}>
-                          <li>Enrojecimiento o ampollas en zona del arco</li>
-                          <li>Dolor que no cede tras 2 semanas de uso gradual</li>
-                          <li>Cambio en la forma de caminar</li>
-                        </ul>
-                      </div>
+                    <div className="print-guia-wrapper">
+                      {isCavo ? <SeccionPadresCavo /> : <SeccionPadres printMode />}
                     </div>
 
                     <div className="print-only signature-block" style={{ marginTop: "1.5rem" }}>
