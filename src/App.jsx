@@ -733,11 +733,14 @@ function InsoleDiagram({ rx, form }) {
     const archPY = iTopY - archRisePx;
     const wedgeTopY = iTopY - wedgeHpx;
     const alzaTopY = wedgeTopY - alzaH;
+    // For equino: the heel lift raises the TOP surface of the heel (not below the insole)
+    const equinoAlzaHpx = isEquino ? alzaHpx : 0;
+    const heelTopY = wedgeTopY - equinoAlzaHpx; // elevated heel end for equino
 
     const topSurface = "M " + pX + "," + iTopY + " L " + archL + "," + iTopY +
       " C " + (archL+22) + "," + iTopY + " " + (archMX-14) + "," + archPY + " " + archMX + "," + archPY +
       " C " + (archMX+14) + "," + archPY + " " + (archR-22) + "," + iTopY + " " + archR + "," + iTopY +
-      " L " + wSX + "," + iTopY + " L " + hX + "," + wedgeTopY;
+      " L " + wSX + "," + iTopY + " L " + hX + "," + heelTopY;
     const bodyD = topSurface + " L " + hX + "," + iBotY + " L " + pX + "," + iBotY + " Z";
 
     const archColor = isCavo ? "rgba(124,58,237,0.35)" : "rgba(99,102,241,0.35)";
@@ -781,16 +784,17 @@ function InsoleDiagram({ rx, form }) {
         {alzaH > 0 && (
           <text x={hX} y={alzaTopY-4} textAnchor="middle" fontSize="7" fill="#b45309" fontWeight="bold">+{liftVal}mm alza</text>
         )}
-        {isEquino && alzaHpx > 0 && (
+        {isEquino && equinoAlzaHpx > 0 && (
           <>
+            {/* Filled wedge showing heel lift material (between wedgeTopY and heelTopY) */}
             <path
-              d={"M " + wSX + "," + iBotY + " L " + hX + "," + iBotY + " L " + hX + "," + (iBotY + alzaHpx) + " L " + wSX + "," + iBotY + " Z"}
+              d={"M " + wSX + "," + wedgeTopY + " L " + hX + "," + wedgeTopY + " L " + hX + "," + heelTopY + " L " + wSX + "," + wedgeTopY + " Z"}
               fill="rgba(217,119,6,0.55)" stroke="#d97706" strokeWidth="1.5"
             />
-            <line x1={hX-4} y1={iBotY} x2={hX-4} y2={iBotY + alzaHpx} stroke="#d97706" strokeWidth="0.8" strokeDasharray="2,2"/>
-            <line x1={hX-9} y1={iBotY} x2={hX+1} y2={iBotY} stroke="#d97706" strokeWidth="1.5"/>
-            <line x1={hX-9} y1={iBotY + alzaHpx} x2={hX+1} y2={iBotY + alzaHpx} stroke="#d97706" strokeWidth="1.5"/>
-            <text x={(wSX+hX)/2} y={iBotY + alzaHpx/2 + 3} textAnchor="middle" fontSize="7" fill="#b45309" fontWeight="bold">Alza {alzaMm}mm</text>
+            <line x1={hX-4} y1={heelTopY} x2={hX-4} y2={wedgeTopY} stroke="#d97706" strokeWidth="0.8" strokeDasharray="2,2"/>
+            <line x1={hX-9} y1={heelTopY} x2={hX+1} y2={heelTopY} stroke="#d97706" strokeWidth="1.5"/>
+            <line x1={hX-9} y1={wedgeTopY} x2={hX+1} y2={wedgeTopY} stroke="#d97706" strokeWidth="1.5"/>
+            <text x={(wSX+hX)/2} y={heelTopY - 4} textAnchor="middle" fontSize="7" fill="#b45309" fontWeight="bold">Alza {alzaMm}mm</text>
           </>
         )}
       </>
@@ -836,6 +840,8 @@ function InsoleDiagram({ rx, form }) {
               {rx.alzaTalon && rx.alzaTalon.pie === "izquierdo" && (
                 <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
               )}
+              {isEquino && alzaMm > 0 && <text x="50" y="196" textAnchor="middle" fontSize="5.5" fill="#b45309" fontWeight="bold">Alza {alzaMm}mm</text>}
+              {isEquino && rx.copaTalon && <text x="50" y="189" textAnchor="middle" fontSize="5" fill="#d97706" fontWeight="bold">Copa {rx.copaTalon}</text>}
               <text x="11" y="200" fontSize="4" fill="var(--text-muted)" opacity="0.55">Scale 20mm</text>
             </svg>
           </div>
@@ -852,6 +858,8 @@ function InsoleDiagram({ rx, form }) {
               {rx.alzaTalon && rx.alzaTalon.pie === "derecho" && (
                 <text x="50" y="180" textAnchor="middle" fontSize="6" fill="#b45309" fontWeight="bold">Alza +{rx.alzaTalon.valor}mm</text>
               )}
+              {isEquino && alzaMm > 0 && <text x="50" y="196" textAnchor="middle" fontSize="5.5" fill="#b45309" fontWeight="bold">Alza {alzaMm}mm</text>}
+              {isEquino && rx.copaTalon && <text x="50" y="189" textAnchor="middle" fontSize="5" fill="#d97706" fontWeight="bold">Copa {rx.copaTalon}</text>}
               <text x="89" y="200" textAnchor="end" fontSize="4" fill="var(--text-muted)" opacity="0.55">Scale 20mm</text>
             </svg>
           </div>
