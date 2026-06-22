@@ -113,19 +113,6 @@ function calcPlano({ grado, edad, talla, peso, sintomas, flexible, dolorMetatars
   rx.cunaRearfoot = `${cunaMm} mm`;
   rx.cunaRearfootTipo = "INTERNA";
 
-  // ── Paso A.4: Kirby Medial Heel Skive (escalado) ──
-  const esForzado = peso === "obesidad";
-  if (grado === GRADES.LEVE) {
-    rx.skiveKirbyMm = round(2 * f);
-    rx.notas.push(`Kirby Skive medial ${rx.skiveKirbyMm}mm: efecto cinético inicial suave en el talón medial.`);
-  } else if (grado === GRADES.MODERADO) {
-    rx.skiveKirbyMm = round(4 * f);
-    rx.notas.push(`Kirby Skive medial ${rx.skiveKirbyMm}mm: incremento ~15% en presión del retropié medial.`);
-  } else if (grado === GRADES.SEVERO || esForzado) {
-    rx.skiveKirbyMm = round(6 * f);
-    rx.notas.push(`Kirby Skive medial ${rx.skiveKirbyMm}mm: incremento ~29% en presión del retropié medial — bloquea hiperpronación severa.`);
-  }
-
   // ── Paso A.5: Anti-pié ──
   rx.cutOut = false;
 
