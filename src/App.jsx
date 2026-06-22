@@ -3,25 +3,8 @@ import { generatePrescription, GRADES } from "./prescriptionEngine";
 import SeccionPadres from "./SeccionPadres";
 import SeccionPadresCavo from "./SeccionPadresCavo";
 import SeccionPadresEquino from "./SeccionPadresEquino";
+import { loadRegistry, addEntry, removeEntry, isConfigured } from "./registryService";
 import "./App.css";
-
-const REGISTRY_KEY = "plantillas_registry";
-
-function loadRegistry() {
-  try {
-    return JSON.parse(localStorage.getItem(REGISTRY_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveRegistry(entries) {
-  try {
-    localStorage.setItem(REGISTRY_KEY, JSON.stringify(entries));
-  } catch (e) {
-    console.error("Error saving registry to localStorage", e);
-  }
-}
 
 function newId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -53,12 +36,16 @@ export default function App() {
   });
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
-  const [registry, setRegistry] = useState(loadRegistry);
+  const [registry, setRegistry] = useState([]);
   const [savedMsg, setSavedMsg] = useState("");
+  const [syncStatus, setSyncStatus] = useState(isConfigured ? "cargando" : "local");
 
   useEffect(() => {
-    saveRegistry(registry);
-  }, [registry]);
+    loadRegistry().then(entries => {
+      setRegistry(entries);
+      setSyncStatus(isConfigured ? "sincronizado" : "local");
+    }).catch(() => setSyncStatus("error"));
+  }, []);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -111,8 +98,9 @@ export default function App() {
     setError("");
   }
 
-  function handleGuardar() {
+  async function handleGuardar() {
     if (!result || !result.indicacion) return;
+    setSavedMsg("Guardando…");
     const entry = {
       id: newId(),
       fecha: new Date().toLocaleDateString("es-CL"),
@@ -128,13 +116,15 @@ export default function App() {
       especialistaRut: form.especialistaRut, observaciones: form.observaciones,
       prescripcion: result,
     };
-    setRegistry((r) => [entry, ...r]);
-    setSavedMsg("Guardado en el registro.");
+    const saved = await addEntry(entry);
+    setRegistry((r) => [saved, ...r]);
+    setSavedMsg(isConfigured ? "✓ Guardado en la nube." : "✓ Guardado localmente.");
   }
 
-  function handleEliminar(id) {
+  async function handleEliminar(entry) {
     if (!confirm("Eliminar este registro?")) return;
-    setRegistry((r) => r.filter((e) => e.id !== id));
+    await removeEntry(entry);
+    setRegistry((r) => r.filter((e) => e.id !== entry.id));
   }
 
   const gradeLabel = { leve: "Leve (I)", moderado: "Moderado (II)", severo: "Severo (III)" };
@@ -450,7 +440,15 @@ export default function App() {
 
       {tab === "registro" && (
         <main className="registro-section">
-          <h2>Registro de Prescripciones</h2>
+          <h2>Registro de Prescripciones
+            <span style={{ fontSize: "0.75rem", fontWeight: 400, marginLeft: "1rem",
+              color: syncStatus === "sincronizado" ? "#059669" : syncStatus === "error" ? "#dc2626" : "#6b7280" }}>
+              {syncStatus === "sincronizado" && "☁ Sincronizado con la nube"}
+              {syncStatus === "local" && "💾 Solo este dispositivo (sin Firebase)"}
+              {syncStatus === "cargando" && "⟳ Cargando…"}
+              {syncStatus === "error" && "⚠ Error de conexión — mostrando caché local"}
+            </span>
+          </h2>
           {registry.length === 0 ? (
             <p className="empty">No hay prescripciones guardadas.</p>
           ) : (
@@ -464,7 +462,7 @@ export default function App() {
                     <span style={{ fontSize: "0.75rem", color: entry.tipoPie === "cavo" ? "#7c3aed" : "#2563eb" }}>
                       {entry.tipoPie === "cavo" ? "Pie Cavo" : "Pie Plano"}
                     </span>
-                    <button className="btn-delete" onClick={() => handleEliminar(entry.id)}>X</button>
+                    <button className="btn-delete" onClick={() => handleEliminar(entry)}>X</button>
                   </div>
                   <div className="reg-details">
                     <span>Talla {entry.talla} EU</span>
