@@ -1115,8 +1115,22 @@ footer br {
   }
 
   .print-guia-wrapper .padres-section {
+    display: block !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  /* Para Padres standalone print */
+  .padres-standalone-wrapper {
+    display: block !important;
+  }
+  .padres-standalone-wrapper .padres-section {
+    display: block !important;
+    padding: 0.5rem !important;
+  }
+  .padres-standalone-wrapper .BotonesSelector,
+  .padres-standalone-wrapper .print-hide-padres {
+    display: none !important;
   }
   .print-guia-wrapper .padres-section > h2,
   .print-guia-wrapper .padres-section > .padres-intro {

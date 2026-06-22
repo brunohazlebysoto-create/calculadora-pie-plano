@@ -504,7 +504,7 @@ export default function App() {
       )}
 
       {tab === "guia" && <GuiaClinica />}
-      {tab === "padres" && <SeccionPadres />}
+      {tab === "padres" && <div className="padres-standalone-wrapper"><SeccionPadres /></div>}
 
       <footer>
         <p>

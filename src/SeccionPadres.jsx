@@ -6,7 +6,7 @@ export default function SeccionPadres({ printMode = false }) {
   const [tipo, setTipo] = useState("plano");
 
   const BotonesSelector = () => (
-    <div style={{ display:"flex", gap:"0.75rem", padding:"1rem 1.5rem 0", flexWrap:"wrap" }}>
+    <div className="print-hide-padres" style={{ display:"flex", gap:"0.75rem", padding:"1rem 1.5rem 0", flexWrap:"wrap" }}>
       <button
         onClick={() => setTipo("plano")}
         style={{ padding:"0.45rem 1.2rem", borderRadius:"999px", border:"2px solid #3b82f6", background: tipo==="plano" ? "#3b82f6" : "transparent", color: tipo==="plano" ? "#fff" : "#3b82f6", fontWeight:600, cursor:"pointer" }}
