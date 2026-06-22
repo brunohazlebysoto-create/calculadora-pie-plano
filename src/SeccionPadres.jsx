@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SeccionPadresCavo from "./SeccionPadresCavo";
+import SeccionPadresEquino from "./SeccionPadresEquino";
 
 export default function SeccionPadres({ printMode = false }) {
   const [tipo, setTipo] = useState("plano");
@@ -15,9 +16,13 @@ export default function SeccionPadres({ printMode = false }) {
         style={{ padding:"0.45rem 1.2rem", borderRadius:"999px", border:"2px solid #7c3aed", background: tipo==="cavo" ? "#7c3aed" : "transparent", color: tipo==="cavo" ? "#fff" : "#7c3aed", fontWeight:600, cursor:"pointer" }}
       >Pie Cavo</button>
       <button
+        onClick={() => setTipo("equino")}
+        style={{ padding:"0.45rem 1.2rem", borderRadius:"999px", border:"2px solid #d97706", background: tipo==="equino" ? "#d97706" : "transparent", color: tipo==="equino" ? "#fff" : "#d97706", fontWeight:600, cursor:"pointer" }}
+      >Pie Equino</button>
+      <button
         onClick={() => window.print()}
         style={{ padding:"0.45rem 1.2rem", borderRadius:"999px", border:"2px solid #059669", background:"#059669", color:"#fff", fontWeight:600, cursor:"pointer", marginLeft:"auto" }}
-      >🖨 Imprimir guía {tipo === "cavo" ? "Pie Cavo" : "Pie Plano"}</button>
+      >🖨 Imprimir guía {tipo === "cavo" ? "Pie Cavo" : tipo === "equino" ? "Pie Equino" : "Pie Plano"}</button>
     </div>
   );
 
@@ -26,6 +31,15 @@ export default function SeccionPadres({ printMode = false }) {
       <>
         {!printMode && <BotonesSelector />}
         <SeccionPadresCavo />
+      </>
+    );
+  }
+
+  if (tipo === "equino") {
+    return (
+      <>
+        {!printMode && <BotonesSelector />}
+        <SeccionPadresEquino />
       </>
     );
   }

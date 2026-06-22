@@ -1,4 +1,4 @@
-// Motor de Prescripción Ortopédica V2.2 — Escalado Biomecánico Proporcional
+// Motor de Prescripción Ortopédica V2.3 — Escalado Biomecánico Proporcional
 // factor_escala = min(1.0, talla/41) aplicado a TODAS las dimensiones
 // Cuña retropié = ROUND(arco/3) — Regla del 1/3 arco-cuña
 // Referencia: Delphi Consensus (PMC4282733) · Cochrane (PMC9561439) · Kirby Skive · Coleman Block Test
@@ -37,6 +37,7 @@ function defaultRx() {
     notas: [],
     fundamentacion: [],
     alzaTalon: null,
+    alzaMedidaMm: 0,
   };
 }
 
@@ -228,7 +229,107 @@ function calcCavo({ grado, edad, talla, testColeman }) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// MÓDULO C — BARRA RETROCAPITAL (Global)
+// MÓDULO C — PIE EQUINO NO NEUROLÓGICO
+// ══════════════════════════════════════════════════════════════════
+
+function calcEquino({ edad, talla, testSilfverskiold, rangoDorsiflexion, dolorRetrocalcaneoSever, dolorMetatarsal }) {
+  const rx = defaultRx();
+  rx.tipoPie = "equino";
+  rx.cunaForefoot = "N/A";
+
+  const f = Math.min(1.0, talla / 41.0);
+  let gradoEq = "leve";
+
+  // C.0: Bloqueo óseo
+  if (testSilfverskiold === "gastro_soleo" && rangoDorsiflexion < -5) {
+    rx.arcoSoporte = round(10 * f) + "mm";
+    rx.alzaMedidaMm = round(6 * f);
+    rx.copaProfundidadMm = round(12 * f);
+    rx.copaTalon = "Estándar";
+    rx.alerta = "ALERTA CLÍNICA: Bloqueo óseo o contractura extrema del Aquiles. Ortesis únicamente de alivio pasivo. Derivación obligatoria a Traumatología para estudio radiográfico de tobillo y evaluar exostosis o pinzamiento articular anterior.";
+    rx.derivacion = true;
+    rx.tipo = "Plantilla Equino — alivio pasivo (bloqueo óseo)";
+    rx.diagnostico_final = "Pie equino no neurológico — posible bloqueo óseo · DF: " + rangoDorsiflexion + "°";
+    rx.material = "EVA Alta Densidad (Shore 50) + cuña de talón en material firmemente compresible";
+    rx.materialForro = "Poron 3.0mm de celda abierta";
+    return rx;
+  }
+
+  // C.1: Sever
+  if (edad >= 8 && edad <= 14 && dolorRetrocalcaneoSever === true) {
+    const alzaMm = round(6 * f);
+    const arcoMm = round(12 * f);
+    rx.alzaMedidaMm = alzaMm;
+    rx.arcoSoporte = arcoMm + "mm";
+    rx.copaProfundidadMm = round(14 * f);
+    rx.copaTalon = "Profunda";
+    rx.alerta = "PROTOCOLO SEVER: Alza de " + alzaMm + "mm y cazoleta profunda para mitigar la tracción mecánica sobre la apófisis calcánea. Prescribir reposo deportivo temporal y estiramientos pasivos del tríceps sural.";
+    rx.tipo = "Plantilla Equino — Protocolo Sever · alza " + alzaMm + "mm / arco " + arcoMm + "mm";
+    rx.diagnostico_final = "Enfermedad de Sever (apofisitis calcánea) · DF: " + rangoDorsiflexion + "°";
+    rx.material = "EVA Doble Densidad (Shore 40) con alza integrada de poliuretano expandido";
+    rx.materialForro = "Poron 3.0mm de celda abierta";
+    rx.notas.push(
+      "Alza de talón " + alzaMm + "mm: relaja el tríceps sural y neutraliza la hiperpronación compensatoria.",
+      "Soporte de arco " + arcoMm + "mm: bloquea el colapso del mediopié en carga."
+    );
+    return rx;
+  }
+
+  // C.2: Alza según rango de dorsiflexión
+  let alzaBase;
+  if (rangoDorsiflexion >= 5 && rangoDorsiflexion <= 9) {
+    alzaBase = 4; gradoEq = "leve";
+  } else if (rangoDorsiflexion >= 0 && rangoDorsiflexion <= 4) {
+    alzaBase = 6; gradoEq = "moderado";
+  } else {
+    alzaBase = 9; gradoEq = "severo";
+  }
+  const alzaMm = round(alzaBase * f);
+  rx.alzaMedidaMm = alzaMm;
+
+  // C.3: Arco anti-pronación compensatoria
+  const arcoMm = round(12 * f);
+  rx.arcoSoporte = arcoMm + "mm";
+  rx.cunaRearfoot = "0";
+  rx.cunaRearfootTipo = "Ninguna";
+
+  // C.4: Copa profunda
+  rx.copaProfundidadMm = round(14 * f);
+  rx.copaTalon = "Profunda";
+
+  // C.5: cutOut=false
+  rx.cutOut = false;
+
+  // Material según Silfverskiold
+  if (testSilfverskiold === "gastrocnemio") {
+    rx.material = "EVA Doble Densidad (Shore 40) con alza integrada de poliuretano expandido";
+  } else if (testSilfverskiold === "gastro_soleo") {
+    rx.material = "EVA Alta Densidad (Shore 50) + cuña de talón en material firmemente compresible";
+  } else {
+    rx.material = "EVA confort monodensidad (Shore 30-35)";
+  }
+  rx.materialForro = "Poron 3.0mm de celda abierta";
+
+  // tipo y diagnostico_final
+  const gradoLabel = { leve: "Leve", moderado: "Moderado", severo: "Severo" }[gradoEq] || gradoEq;
+  rx.tipo = "Plantilla Equino " + gradoLabel + " — alza " + alzaMm + "mm / arco " + arcoMm + "mm";
+  rx.diagnostico_final = "Pie equino no neurológico " + gradoEq + " · Silfverskiold: " + testSilfverskiold + " · DF: " + rangoDorsiflexion + "°";
+
+  // notas
+  rx.notas.push("Alza de talón " + alzaMm + "mm: relaja el tríceps sural y neutraliza la hiperpronación compensatoria.");
+  rx.notas.push("Soporte de arco " + arcoMm + "mm: bloquea el colapso del mediopié en carga.");
+  if (testSilfverskiold === "gastrocnemio") {
+    rx.notas.push("Silfverskiold +: solo gastrocnemio afectado — estirar con rodilla extendida.");
+  }
+  if (testSilfverskiold === "gastro_soleo") {
+    rx.notas.push("Silfverskiold −: complejo gastro-sóleo contracturado — estiramientos con rodilla flexionada esenciales.");
+  }
+
+  return rx;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MÓDULO D — BARRA RETROCAPITAL (Global)
 // ══════════════════════════════════════════════════════════════════
 
 function aplicarBarra(rx, { edad, talla, grado, tipoPie, dolorMetatarsal }) {
@@ -261,7 +362,8 @@ function aplicarBarra(rx, { edad, talla, grado, tipoPie, dolorMetatarsal }) {
 export function generatePrescription({
   tipoPie = "plano", talla, edad, grado, peso = "normal",
   sintomas, flexible, dolorMetatarsal, testColeman,
-  barraRetrocapital, dismetriaActiva, dismetriaPie, dismetriaValor
+  barraRetrocapital, dismetriaActiva, dismetriaPie, dismetriaValor,
+  testSilfverskiold, rangoDorsiflexion, dolorRetrocalcaneoSever
 }) {
   if (!talla || !edad) return { error: "Talla y edad son requeridas." };
   if (edad < 1 || edad > 120) return { error: "Edad fuera de rango (1–120)." };
@@ -272,6 +374,18 @@ export function generatePrescription({
   let rx;
   if (tipoPie === "cavo") {
     rx = calcCavo({ grado, edad, talla, testColeman });
+  } else if (tipoPie === "equino") {
+    rx = calcEquino({
+      edad, talla,
+      testSilfverskiold: testSilfverskiold || "gastrocnemio",
+      rangoDorsiflexion: rangoDorsiflexion !== undefined ? rangoDorsiflexion : 5,
+      dolorRetrocalcaneoSever: !!dolorRetrocalcaneoSever,
+      dolorMetatarsal: dm,
+    });
+    if (rx.indicacion) {
+      aplicarBarra(rx, { edad, talla, grado: "moderado", tipoPie: "equino", dolorMetatarsal: dm || (rx.alzaMedidaMm > 0 && rangoDorsiflexion < 5) });
+    }
+    return rx;
   } else {
     if (edad < 2) return { error: "Edad mínima para prescripción: 2 años." };
     rx = calcPlano({

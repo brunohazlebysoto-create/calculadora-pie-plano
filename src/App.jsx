@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { generatePrescription, GRADES } from "./prescriptionEngine";
 import SeccionPadres from "./SeccionPadres";
 import SeccionPadresCavo from "./SeccionPadresCavo";
+import SeccionPadresEquino from "./SeccionPadresEquino";
 import "./App.css";
 
 const REGISTRY_KEY = "plantillas_registry";
@@ -46,6 +47,9 @@ export default function App() {
     especialidad: localStorage.getItem("especialista_especialidad") || "Traumatología y Ortopedia Infantil",
     especialistaRut: localStorage.getItem("especialista_rut") || "17.618.006-4",
     observaciones: "",
+    testSilfverskiold: "gastrocnemio",
+    rangoDorsiflexion: 5,
+    dolorRetrocalcaneoSever: false,
   });
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -88,6 +92,9 @@ export default function App() {
       dismetriaActiva: form.dismetriaActiva,
       dismetriaPie: form.dismetriaPie,
       dismetriaValor: parseInt(form.dismetriaValor) || 0,
+      testSilfverskiold: form.testSilfverskiold,
+      rangoDorsiflexion: parseInt(form.rangoDorsiflexion) || 5,
+      dolorRetrocalcaneoSever: form.dolorRetrocalcaneoSever,
     });
     if (rx.error) { setError(rx.error); setResult(null); return; }
     if (rx.tipoPie === "cavo" && !rx.indicacion && rx.alerta) { setResult(rx); setError(""); return; }
@@ -132,6 +139,7 @@ export default function App() {
 
   const gradeLabel = { leve: "Leve (I)", moderado: "Moderado (II)", severo: "Severo (III)" };
   const isCavo = form.tipoPie === "cavo";
+  const isEquino = form.tipoPie === "equino";
 
   return (
     <div className="app">
@@ -163,6 +171,10 @@ export default function App() {
                     <input type="radio" name="tipoPie" value="cavo" checked={form.tipoPie === "cavo"} onChange={handleChange} />
                     Pie Cavo
                   </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", cursor: "pointer", fontWeight: form.tipoPie === "equino" ? "bold" : "normal" }}>
+                    <input type="radio" name="tipoPie" value="equino" checked={form.tipoPie === "equino"} onChange={handleChange} />
+                    Pie Equino No Neurológico
+                  </label>
                 </div>
               </fieldset>
 
@@ -181,7 +193,7 @@ export default function App() {
                 <input name="edad" type="number" value={form.edad} onChange={handleChange} min="1" max="110" placeholder="Ej: 8" required />
               </label>
 
-              <label>
+              {!isEquino && <label>
                 {isCavo ? "Grado de Pie Cavo *" : "Grado de Pie Plano *"}
                 <select name="grado" value={form.grado} onChange={handleChange}>
                   {isCavo ? (
@@ -198,7 +210,7 @@ export default function App() {
                     </>
                   )}
                 </select>
-              </label>
+              </label>}
 
               <label>
                 Peso del Paciente
@@ -215,7 +227,7 @@ export default function App() {
                   Presenta síntomas (dolor, fatiga, limitación funcional)
                 </label>
 
-                {!isCavo && (
+                {!isCavo && !isEquino && (
                   <>
                     <label className="checkbox-label">
                       <input type="checkbox" name="flexible" checked={form.flexible} onChange={handleChange} />
@@ -236,6 +248,28 @@ export default function App() {
                       <option value="negativo">Negativo — Retropié rígido estructurado: el talón no corrige → Cuña Interna acomodativa</option>
                     </select>
                   </label>
+                )}
+
+                {isEquino && (
+                  <>
+                    <label style={{ marginTop: "0.5rem" }}>
+                      Test de Silfverskiold *
+                      <select name="testSilfverskiold" value={form.testSilfverskiold} onChange={handleChange} style={{ marginTop: "0.25rem" }}>
+                        <option value="gastrocnemio">Gastrocnemio aislado (mejora al flexionar rodilla)</option>
+                        <option value="gastro_soleo">Gastro-sóleo complejo (persiste con rodilla flexionada)</option>
+                        <option value="negativo">Negativo / Normal</option>
+                      </select>
+                    </label>
+                    <label style={{ marginTop: "0.5rem" }}>
+                      Rango de Dorsiflexión (grados) *
+                      <input type="number" name="rangoDorsiflexion" value={form.rangoDorsiflexion} onChange={handleChange} min="-20" max="30" style={{ marginTop: "0.25rem" }}/>
+                      <small style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>{"<0° Severo · 0-4° Moderado · 5-9° Leve · ≥10° Normal"}</small>
+                    </label>
+                    <label className="checkbox-label" style={{ marginTop: "0.5rem" }}>
+                      <input type="checkbox" name="dolorRetrocalcaneoSever" checked={form.dolorRetrocalcaneoSever} onChange={e => setForm(f => ({...f, dolorRetrocalcaneoSever: e.target.checked}))} />
+                      {" "}Dolor retocalcáneo (Sever / Apofisitis calcánea) — edad 8-14 años
+                    </label>
+                  </>
                 )}
               </fieldset>
 
@@ -327,8 +361,8 @@ export default function App() {
                       <span>Talla {form.talla} EU</span>
                       <span>{form.edad} años</span>
                       <span className={"badge badge-" + form.grado}>{gradeLabel[form.grado]}</span>
-                      <span className="badge" style={{ background: isCavo ? "#7c3aed" : "#2563eb", color: "#fff", padding: "0.2rem 0.6rem", borderRadius: "4px", fontSize: "0.78rem" }}>
-                        {isCavo ? "Pie Cavo" : "Pie Plano"}
+                      <span className="badge" style={{ background: isEquino ? "#d97706" : isCavo ? "#7c3aed" : "#2563eb", color: "#fff", padding: "0.2rem 0.6rem", borderRadius: "4px", fontSize: "0.78rem" }}>
+                        {isEquino ? "Pie Equino" : isCavo ? "Pie Cavo" : "Pie Plano"}
                       </span>
                     </div>
                   </div>
@@ -336,6 +370,7 @@ export default function App() {
                   <div className="rx-grid">
                     <RxItem label="Tipo de Ortesis" value={result.tipo} highlight={true} />
                     <RxItem label={isCavo ? "Arco Lateral (mm)" : "Arco Medial (mm)"} value={result.arcoSoporte} />
+                    {result.alzaMedidaMm > 0 && <RxItem label="Alza de Talón" value={`${result.alzaMedidaMm} mm`} />}
 
                     <RxItem label="Cuña Retropié" value={result.cunaRearfoot !== "0" ? `${result.cunaRearfoot} (${result.cunaRearfootTipo})` : "No"} />
                     {!isCavo && <RxItem label="Flanco Medial" value={result.flancoMedial} />}
@@ -386,7 +421,7 @@ export default function App() {
 
                   <div className="print-page-2">
                     <div className="print-header">
-                      <h2>Educación para Padres — {isCavo ? "Pie Cavo" : "Pie Plano"} y Uso de Plantillas</h2>
+                      <h2>Educación para Padres — {isEquino ? "Pie Equino" : isCavo ? "Pie Cavo" : "Pie Plano"} y Uso de Plantillas</h2>
                       <p>Paciente: <strong>{form.paciente || "Sin nombre"}</strong> · Fecha: {new Date().toLocaleDateString("es-CL")} · Próximo control: <strong>{result.fechaControl}</strong></p>
                       {form.especialista && (
                         <p style={{ marginTop: "0.25rem", fontWeight: "bold" }}>
@@ -396,7 +431,7 @@ export default function App() {
                     </div>
 
                     <div className="print-guia-wrapper">
-                      {isCavo ? <SeccionPadresCavo /> : <SeccionPadres printMode />}
+                      {isEquino ? <SeccionPadresEquino /> : isCavo ? <SeccionPadresCavo /> : <SeccionPadres printMode />}
                     </div>
 
                     <div className="print-only signature-block" style={{ marginTop: "1.5rem" }}>
@@ -582,6 +617,8 @@ function InsoleDiagram({ rx, form }) {
   if (!rx || !rx.indicacion) return null;
 
   const isCavo = rx.tipoPie === "cavo";
+  const isEquino = rx.tipoPie === "equino";
+  const alzaMm = rx.alzaMedidaMm || 0;
   const hasMetatarsalPad = rx.barraRetrocapitalMm > 0;
   const hasRearfootWedge = rx.cunaRearfoot && rx.cunaRearfoot !== "0°" && rx.cunaRearfoot !== "0 mm" && !rx.cunaRearfoot.includes("sin cuña") && rx.cunaRearfoot !== "0";
   const cunaRearfootText = hasRearfootWedge ? rx.cunaRearfoot : "";
@@ -592,6 +629,7 @@ function InsoleDiagram({ rx, form }) {
   const archText = isCavo ? "Arco lateral: " + rx.arcoSoporte : "Arco: " + rx.arcoSoporte;
   const archOpacity = archMm >= 22 ? 0.95 : archMm >= 18 ? 0.75 : archMm >= 15 ? 0.55 : 0.35;
   const PX_MM = 2.5;
+  const alzaHpx = alzaMm * PX_MM;
   const cunaMm = hasRearfootWedge ? (parseInt(rx.cunaRearfoot) || 0) : 0;
   const wedgeHpx = cunaMm * PX_MM;
   const archRisePx = archMm * PX_MM;
@@ -613,6 +651,13 @@ function InsoleDiagram({ rx, form }) {
         fill="rgba(99,102,241,0.5)" stroke="rgba(99,102,241,0.85)" strokeWidth="1.4" opacity={archOpacity}
       />
     );
+
+    const equinoHeelZone = isEquino ? (
+      <path
+        d="M26 210 C26 185 34 175 50 172 C66 175 74 185 74 210 C74 210 50 210 50 210 Z"
+        fill="rgba(217,119,6,0.45)" stroke="#d97706" strokeWidth="1.4"
+      />
+    ) : null;
 
     // Rearfoot wedge
     let wedgeZone = null;
@@ -652,6 +697,7 @@ function InsoleDiagram({ rx, form }) {
         />
         <line x1="50" y1="12" x2="50" y2="208" stroke="var(--text-muted)" strokeWidth="0.4" strokeDasharray="4,3" opacity="0.2"/>
         {archZone}
+        {equinoHeelZone}
         {wedgeZone}
         {hasMetatarsalPad && (
           <path d="M27 83 C27 79 73 79 73 83 C73 87 27 87 27 83 Z" fill="rgba(245,158,11,0.8)" stroke="#d97706" strokeWidth="1.5"/>
@@ -735,6 +781,18 @@ function InsoleDiagram({ rx, form }) {
         {alzaH > 0 && (
           <text x={hX} y={alzaTopY-4} textAnchor="middle" fontSize="7" fill="#b45309" fontWeight="bold">+{liftVal}mm alza</text>
         )}
+        {isEquino && alzaHpx > 0 && (
+          <>
+            <path
+              d={"M " + wSX + "," + iBotY + " L " + hX + "," + iBotY + " L " + hX + "," + (iBotY + alzaHpx) + " L " + wSX + "," + iBotY + " Z"}
+              fill="rgba(217,119,6,0.55)" stroke="#d97706" strokeWidth="1.5"
+            />
+            <line x1={hX-4} y1={iBotY} x2={hX-4} y2={iBotY + alzaHpx} stroke="#d97706" strokeWidth="0.8" strokeDasharray="2,2"/>
+            <line x1={hX-9} y1={iBotY} x2={hX+1} y2={iBotY} stroke="#d97706" strokeWidth="1.5"/>
+            <line x1={hX-9} y1={iBotY + alzaHpx} x2={hX+1} y2={iBotY + alzaHpx} stroke="#d97706" strokeWidth="1.5"/>
+            <text x={(wSX+hX)/2} y={iBotY + alzaHpx/2 + 3} textAnchor="middle" fontSize="7" fill="#b45309" fontWeight="bold">Alza {alzaMm}mm</text>
+          </>
+        )}
       </>
     );
   };
@@ -754,6 +812,11 @@ function InsoleDiagram({ rx, form }) {
         <p style={{ fontSize: "0.85rem", color: "#7c3aed", marginBottom: "0.5rem" }}>
           Pie Cavo: soporte de arco LATERAL (zona violeta). Cuña de retropié: {cavoWedgeExt ? "EXTERNA (lateral)" : "INTERNA (medial)"}.
           {hasCutOut && " Cut-out bajo 1er radio (naranja punteado)."}
+        </p>
+      )}
+      {isEquino && (
+        <p style={{ fontSize: "0.85rem", color: "#d97706", marginBottom: "0.5rem" }}>
+          Pie Equino: alza posterior del talón (zona naranja) relaja el tríceps sural. Soporte medial anti-pronación compensatoria.
         </p>
       )}
 
@@ -844,6 +907,12 @@ function InsoleDiagram({ rx, form }) {
           <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
             <span style={{ display:"inline-block", width:14, height:10, background:"rgba(180,83,9,0.5)", border:"1px solid #b45309", borderRadius:2 }}></span>
             {"Alza de talón (+" + rx.alzaTalon.valor + "mm)"}
+          </span>
+        )}
+        {isEquino && alzaMm > 0 && (
+          <span style={{ display:"flex", alignItems:"center", gap:"0.3rem" }}>
+            <span style={{ display:"inline-block", width:14, height:10, background:"rgba(217,119,6,0.5)", border:"1px solid #d97706", borderRadius:2 }}></span>
+            {`Alza de talón (${alzaMm}mm)`}
           </span>
         )}
       </div>
