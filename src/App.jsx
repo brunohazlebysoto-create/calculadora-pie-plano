@@ -203,7 +203,7 @@ export default function App() {
                 Peso del Paciente
                 <select name="peso" value={form.peso} onChange={handleChange}>
                   <option value="normal">Normal / Sobrepeso leve</option>
-                  <option value="obesidad">Obesidad (IMC ≥30) — Kirby Skive máximo</option>
+                  <option value="obesidad">Obesidad (IMC ≥30)</option>
                 </select>
               </label>
 

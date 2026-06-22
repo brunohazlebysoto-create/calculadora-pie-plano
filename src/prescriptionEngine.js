@@ -18,7 +18,7 @@ function defaultRx() {
     tipo: "",
     diagnostico_final: "",
     arcoSoporte: "0mm",
-    skiveKirbyMm: 0,
+
     cunaRearfoot: "0",
     cunaRearfootTipo: "Ninguna",
     cunaForefoot: "0",
@@ -63,7 +63,6 @@ function calcPlano({ grado, edad, talla, peso, sintomas, flexible, dolorMetatars
     rx.tipo = "Plantilla Acomodativa Pura (Pie Plano Rígido)";
     rx.diagnostico_final = `Pie plano rígido ${grado} — Test de Jack negativo`;
     rx.arcoSoporte = `${arco}mm`;
-    rx.skiveKirbyMm = 0;
     rx.cunaRearfoot = "0";
     rx.cunaRearfootTipo = "Ninguna";
     rx.barraRetrocapitalMm = 0;
@@ -187,7 +186,6 @@ function calcCavo({ grado, edad, talla, testColeman }) {
   }
 
   // Paso B.2: Dosificación del Arco y Copa
-  rx.skiveKirbyMm = 0;
   let arcoBase, copaBase, copaTipo;
   if (grado === GRADES.LEVE) {
     arcoBase = 18; copaBase = 10; copaTipo = "Estándar";
